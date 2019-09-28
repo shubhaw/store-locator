@@ -1,0 +1,29 @@
+.Button {
+    border-radius: 5px;
+    color: white;
+    outline: none;
+    cursor: pointer;
+    font: inherit;
+    padding: 10px;
+    margin: 10px;
+    font-weight: bold;
+    text-align: center;
+}
+
+
+.Button:disabled {
+    background-color: #CCC;
+    cursor: not-allowed;
+}
+
+.Map {
+    background-color: rgb(0, 183, 255);
+}
+
+.Success {
+    background-color: #5C9210;
+}
+
+.Danger {
+    background-color: #944317;
+}

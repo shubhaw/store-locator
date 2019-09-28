@@ -1,0 +1,26 @@
+.AddStore {
+    background-color: azure;
+}
+.formWrapper {
+    width: 100%;
+}
+
+.form {
+    width: 100%;
+}
+
+.map {
+    width: 100%;
+    text-align: center;
+    display: block;
+}
+/* 
+@media screen and (min-width: 500px) {
+    .formWrapper {
+        display: flex;
+        flex-direction: row;
+    }
+    .form, .map {
+        width: 50%;
+    }
+} */
