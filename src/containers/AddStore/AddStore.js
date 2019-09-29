@@ -180,7 +180,6 @@ class AddStore extends React.Component {
         
         console.log('addStoreHandler Called!!!');
 
-        // this.setState({ isLoading: true });
         let storeDetails = {};
         for (let formElementName in this.state.storeForm) {
             storeDetails[formElementName] = this.state.storeForm[formElementName].value;
@@ -191,26 +190,10 @@ class AddStore extends React.Component {
         axios.post('/store', storeDetails)
             .then(res => console.log(res))
             .catch(err => console.error(err));
-        // if (!this.state.location && navigator.geolocation) {
-        //     navigator.geolocation.getCurrentPosition(
-        //         position => this.setState({
-        //             location: {
-        //                 lat: position.coords.latitude,
-        //                 lng: position.coords.longitude
-        //             }
-        //         }, () => {
-        //             storeDetails.location = this.state.location;
-        //             // call rest end point here
-        //         })
-        //         ,
-        //         this.errorHandler);
-        // } else if (!this.state.location && !navigator.geolocation) {
-        //     alert('Your browser doesn\'t support location sharing!!!\nPlease use another browser!');
-        // }
     }
 
     inputChangeHandler = (event, inputIdentifier) => {
-        // console.log(event.target.value);
+        
         const updatedForm = {
             ...this.state.storeForm
         };
