@@ -16,9 +16,9 @@ class AddStore extends React.Component {
                 },
                 value: new Date().getDate() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getFullYear(),
                 validation: {
-                    required: false
+                    required: true
                 },
-                isValid: false,
+                isValid: true,
                 isTouched: false
             },
             timeOfSubmission: {
@@ -30,9 +30,9 @@ class AddStore extends React.Component {
                 },
                 value: new Date().getHours() + ':' + new Date().getMinutes(),
                 validation: {
-                    required: false
+                    required: true
                 },
-                isValid: false,
+                isValid: true,
                 isTouched: false
             },
             retailerLAPUNumber: {
@@ -40,12 +40,14 @@ class AddStore extends React.Component {
                 elementConfig: {
                     type: 'number',
                     placeholder: 'Retailer LAPU Number',
-                    min: '1000000000',
-                    max: '9999999999'
+                    min: 1000000000,
+                    max: 9999999999
                 },
                 value: '',
                 validation: {
-                    required: true
+                    required: true,
+                    min: 1000000000,
+                    max: 9999999999
                 },
                 isValid: false,
                 isTouched: false
@@ -55,8 +57,8 @@ class AddStore extends React.Component {
                 elementConfig: {
                     placeholder: 'FOS Beat',
                     options: [
-                        { value: 'fastest', displayValue: 'Fastest' },
-                        { value: 'cheapest', displayValue: 'Cheapest' }
+                        { value: 'FOS Beat Value 1', displayValue: 'FOS Beat Value 1' },
+                        { value: 'FOS Beat Value 2', displayValue: 'FOS Beat Value 2' }
                     ]
                 },
                 value: 'fastest',
@@ -141,7 +143,9 @@ class AddStore extends React.Component {
                 isTouched: false
             }
         },
-        location: null
+        location: null,
+        isMapVisible: false,
+        isFormValid: false
     }
 
     checkValidity(value, rules) {
@@ -159,36 +163,46 @@ class AddStore extends React.Component {
             isValid = value.trim(' ').length <= rules.maxLength && isValid;
         }
 
+        if(rules.min) {
+            isValid = parseInt(value.trim(' ')) >= rules.min && isValid;
+        }
+
+        if(rules.max) {
+            isValid = parseInt(value.trim(' ')) <= rules.max && isValid;
+        }
+
         return isValid;
     }
 
     addStoreHandler = (event) => {
-        console.log('OrderHandler Called!!!');
-
         event.preventDefault();
+        
+        console.log('addStoreHandler Called!!!');
 
-        this.setState({ isLoading: true });
+        // this.setState({ isLoading: true });
         let storeDetails = {};
         for (let formElementName in this.state.storeForm) {
             storeDetails[formElementName] = this.state.storeForm[formElementName].value;
         }
 
-        if (!this.state.location) {
-            this.fetchCurrentLocation();
-        }
-
-        
         storeDetails.location = this.state.location;
-        console.log(storeDetails);
-        //workaround
-        // setTimeout(() => {
-        //     storeDetails.location = this.state.location;
-        //     console.log(storeDetails);
-        // }, 5000);
-
-
-
-        //this.props.purchaseBurger(order);
+        
+        // if (!this.state.location && navigator.geolocation) {
+        //     navigator.geolocation.getCurrentPosition(
+        //         position => this.setState({
+        //             location: {
+        //                 lat: position.coords.latitude,
+        //                 lng: position.coords.longitude
+        //             }
+        //         }, () => {
+        //             storeDetails.location = this.state.location;
+        //             // call rest end point here
+        //         })
+        //         ,
+        //         this.errorHandler);
+        // } else if (!this.state.location && !navigator.geolocation) {
+        //     alert('Your browser doesn\'t support location sharing!!!\nPlease use another browser!');
+        // }
     }
 
     inputChangeHandler = (event, inputIdentifier) => {
@@ -213,11 +227,9 @@ class AddStore extends React.Component {
         let isFormValid = true;
         for (let inputName in updatedForm) {
             isFormValid = updatedForm[inputName].isValid && isFormValid;
-            //console.log(inputName, ': ', updatedForm[inputName].isValid);
-
         }
 
-        console.log(isFormValid);
+        console.log('isFormValid:', isFormValid);
 
 
         this.setState({
@@ -227,32 +239,24 @@ class AddStore extends React.Component {
 
     }
 
-
-
-
     fetchCurrentLocation = (event) => {
-        if (event) {
-            event.preventDefault();
-        }
-
         if (navigator.geolocation) {
-            // console.log('Available');
             let options = {};
-            navigator.geolocation.getCurrentPosition(this.showLocation, this.errorHandler, options);
+            navigator.geolocation.getCurrentPosition(this.setLocation, this.errorHandler, options);
         } else {
-            console.log('Location feature not available on this browser!!!');
+            alert('Location feature is not available on this browser!!!\nPlease use some other browser.');
         }
     }
 
     errorHandler = err => {
         if (err.code === 1) {
-            alert("Error: Access is denied!");
+            alert("Error: Access is denied!\nPlease allow the browser to access the location.");
         } else if (err.code === 2) {
-            alert("Error: Position is unavailable!");
+            alert("Error: Location is unavailable!");
         }
     }
 
-    showLocation = position => {
+    setLocation = position => {
         console.log('Latitude: ', position.coords.latitude, 'Longitude:', position.coords.longitude);
         this.setState({
             location: {
@@ -262,10 +266,21 @@ class AddStore extends React.Component {
         });
     }
 
+    componentDidMount() {
+        this.fetchCurrentLocation();
+    }
+
+    toggleMap = (event) => {
+        event.preventDefault();
+        this.setState(prevState => ({ isMapVisible: !prevState.isMapVisible }));
+    }
+
     render() {
         let map = null;
-        if (this.state.location) {
+        let mapButtonText = 'Show Location on Map';
+        if (this.state.isMapVisible) {
             map = <Map currentLocation={this.state.location} />
+            mapButtonText = 'Hide Map';
         }
 
         let formElementsArray = [];
@@ -276,6 +291,10 @@ class AddStore extends React.Component {
             });
         }
 
+        let submitFormButton = <Button buttonType="Success" onClick={this.addStoreHandler}>Submit</Button>;
+        if(!this.state.isFormValid) {
+            submitFormButton = <Button buttonType="Success" disabled onClick={this.addStoreHandler}>Submit</Button>;
+        }
         let form = (
             <form className={styleClasses.formWrapper}
             // onSubmit={this.addStoreHandler}
@@ -297,9 +316,11 @@ class AddStore extends React.Component {
                     }
                 </div>
                 <div className={styleClasses.map}>
-                    <Button buttonType="Map" onClick={this.fetchCurrentLocation}>Show Location on Map</Button>
                     {map}
-                    <Button buttonType="Success" onClick={this.addStoreHandler}>Submit</Button>
+                    <Button buttonType="Map" onClick={this.toggleMap}>
+                        {mapButtonText}
+                    </Button>
+                    {submitFormButton}
                 </div>
 
             </form>);

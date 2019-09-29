@@ -1,5 +1,6 @@
 .AddStore {
-    background-color: azure;
+    box-sizing: border-box;
+    /* background-color: antiquewhite; */
 }
 .formWrapper {
     width: 100%;
