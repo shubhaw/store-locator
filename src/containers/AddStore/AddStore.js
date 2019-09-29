@@ -3,6 +3,7 @@ import styleClasses from './AddStore.module.css';
 import Input from '../../components/UI/Input/Input';
 import Button from '../../components/UI/Button/Button';
 import Map from '../../components/Map/Map';
+import axios from '../../axios';
 
 class AddStore extends React.Component {
     state = {
@@ -107,7 +108,7 @@ class AddStore extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    placeholder: 'Jio Gross'
+                    placeholder: 'Vodafone Gross'
                 },
                 value: '',
                 validation: {
@@ -133,7 +134,7 @@ class AddStore extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    placeholder: 'Jio Gross'
+                    placeholder: 'Idea Gross'
                 },
                 value: '',
                 validation: {
@@ -179,34 +180,20 @@ class AddStore extends React.Component {
         
         console.log('addStoreHandler Called!!!');
 
-        // this.setState({ isLoading: true });
         let storeDetails = {};
         for (let formElementName in this.state.storeForm) {
             storeDetails[formElementName] = this.state.storeForm[formElementName].value;
         }
 
         storeDetails.location = this.state.location;
-        
-        // if (!this.state.location && navigator.geolocation) {
-        //     navigator.geolocation.getCurrentPosition(
-        //         position => this.setState({
-        //             location: {
-        //                 lat: position.coords.latitude,
-        //                 lng: position.coords.longitude
-        //             }
-        //         }, () => {
-        //             storeDetails.location = this.state.location;
-        //             // call rest end point here
-        //         })
-        //         ,
-        //         this.errorHandler);
-        // } else if (!this.state.location && !navigator.geolocation) {
-        //     alert('Your browser doesn\'t support location sharing!!!\nPlease use another browser!');
-        // }
+
+        axios.post('/store', storeDetails)
+            .then(res => console.log(res))
+            .catch(err => console.error(err));
     }
 
     inputChangeHandler = (event, inputIdentifier) => {
-        // console.log(event.target.value);
+        
         const updatedForm = {
             ...this.state.storeForm
         };
