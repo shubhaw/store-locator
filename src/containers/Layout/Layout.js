@@ -1,7 +1,5 @@
 import React from 'react';
 import styleClasses from './Layout.module.css';
-import AddStore from '../AddStore/AddStore';
-
 
 class Layout extends React.Component {
     
@@ -10,7 +8,7 @@ class Layout extends React.Component {
         return (
             <div className={styleClasses.Layout}>
                 <h1>Store Locator</h1>
-                <AddStore />
+                {this.props.children}
             </div>
         )
     }
