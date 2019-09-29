@@ -188,7 +188,7 @@ class AddStore extends React.Component {
 
         storeDetails.location = this.state.location;
 
-        axios.put('/store', storeDetails)
+        axios.post('/store', storeDetails)
             .then(res => console.log(res))
             .catch(err => console.error(err));
         // if (!this.state.location && navigator.geolocation) {
