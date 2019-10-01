@@ -7,7 +7,7 @@ class Layout extends React.Component {
         
         return (
             <div className={styleClasses.Layout}>
-                <h1>Store Locator</h1>
+                {/* <h1>Store Locator</h1> */}
                 {this.props.children}
             </div>
         )
