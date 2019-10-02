@@ -37,7 +37,7 @@ const Store = props => {
                 </div>
             </div>
             <div className={styleClasses.submittedAt}>
-                <span style={{fontWeight: 'bold'}}>Submitted at: </span> {props.dateTime}
+                <span style={{fontWeight: 'bold'}}>Submitted at: </span> {props.submittedAt}
             </div>
         </div>
     )

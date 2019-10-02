@@ -18,8 +18,27 @@ class Stores extends React.Component {
     componentDidMount() {
         axios.get('/stores')
             .then(res => {
-                this.setState({ stores: res.data });
-                console.log(res.data);
+                // let stores = [];
+                let stores = res.data.map(rawStore => {
+                    const store = {
+                        retailerLAPUNumber: rawStore.retailerLAPUNumber,
+                        retailerLocation: rawStore.location._latitude + '°N, ' + rawStore.location._longitude + '°E',
+                        FOSBeat: rawStore.FOSBeat,
+                        jioTertiary: rawStore.jioTertiary,
+                        jioGross: rawStore.jioGross,
+                        vodafoneTertiary: rawStore.vodafoneTertiary,
+                        vodafoneGross: rawStore.vodafoneGross,
+                        ideaTertiary: rawStore.ideaTertiary,
+                        ideaGross: rawStore.ideaGross,
+                        submittedAt: new Date(rawStore.submittedAt._seconds * 1000).toLocaleString(),
+                        dateOfSubmission: new Date(rawStore.submittedAt._seconds * 1000).toLocaleDateString(),
+                        timeOfSubmission: new Date(rawStore.submittedAt._seconds * 1000).toLocaleTimeString(),
+                        addedBy: rawStore.addedBy
+                    };
+                    return store;
+                });
+                this.setState({ stores: stores });
+                console.log(stores);
             })
             .catch(err => console.error(err));
     }
@@ -28,12 +47,11 @@ class Stores extends React.Component {
         let storeList = null;
         if (this.state.stores) {
             storeList = this.state.stores.map((store, index) => {
-                const location = store.location._latitude + '°N, '  + store.location._longitude + '°E'
                 return (
                     <Store
                         key={index}
                         retailerLAPUNumber={store.retailerLAPUNumber}
-                        retailerLocation={location}
+                        retailerLocation={store.retailerLocation}
                         FOSBeat={store.FOSBeat}
                         jioTertiary={store.jioTertiary}
                         jioGross={store.jioGross}
@@ -41,6 +59,7 @@ class Stores extends React.Component {
                         vodafoneGross={store.vodafoneGross}
                         ideaTertiary={store.ideaTertiary}
                         ideaGross={store.ideaGross}
+                        submittedAt={store.submittedAt}
                     />
                 )
             })
@@ -54,9 +73,9 @@ class Stores extends React.Component {
                 <center>
                     <ExcelFile element={<Button buttonType="Success" onClick={this.addStoreHandler}>Download</Button>}>
                         <ExcelSheet data={this.state.stores} name="Stores">
-                            <ExcelColumn label="Date Stamp" value="dateOfSubmission" />
-                            <ExcelColumn label="Time Stamp" value="timeOfSubmission" />
-                            <ExcelColumn label="Retailer Shop Location (Lat, Long)" value="retailerLAPUNumber" />
+                            <ExcelColumn label="Date" value="dateOfSubmission" />
+                            <ExcelColumn label="Time" value="timeOfSubmission" />
+                            <ExcelColumn label="Retailer Shop Location (Lat, Long)" value="retailerLocation" />
                             <ExcelColumn label="Retailer Airtel LAPU Number" value="retailerLAPUNumber" />
                             <ExcelColumn label="FOS Beat" value="FOSBeat" />
                             <ExcelColumn label="Jio Tertiary" value="jioTertiary" />
@@ -65,6 +84,7 @@ class Stores extends React.Component {
                             <ExcelColumn label="Vodafone Gross" value="vodafoneGross" />
                             <ExcelColumn label="!dea Tertiary" value="ideaTertiary" />
                             <ExcelColumn label="!dea Gross" value="ideaGross" />
+                            <ExcelColumn label="Added By" value="addedBy" />
                         </ExcelSheet>
                     </ExcelFile>
                 </center>
