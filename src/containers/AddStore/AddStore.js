@@ -3,39 +3,12 @@ import styleClasses from './AddStore.module.css';
 import Input from '../../components/UI/Input/Input';
 import Button from '../../components/UI/Button/Button';
 import Map from '../../components/Map/Map';
+import Spinner from '../../components/UI/Spinner/Spinner';
 import axios from '../../axios';
 
 class AddStore extends React.Component {
     state = {
         storeForm: {
-            dateOfSubmission: {
-                elementType: 'input',
-                elementConfig: {
-                    type: 'text',
-                    placeholder: 'Date of Submission',
-                    readOnly: 'readOnly'
-                },
-                value: new Date().getDate() + '-' + (new Date().getMonth() + 1) + '-' + new Date().getFullYear(),
-                validation: {
-                    required: true
-                },
-                isValid: true,
-                isTouched: false
-            },
-            timeOfSubmission: {
-                elementType: 'input',
-                elementConfig: {
-                    type: 'text',
-                    placeholder: 'Time of Submission',
-                    readOnly: 'readOnly'
-                },
-                value: new Date().getHours() + ':' + new Date().getMinutes(),
-                validation: {
-                    required: true
-                },
-                isValid: true,
-                isTouched: false
-            },
             retailerLAPUNumber: {
                 elementType: 'input',
                 elementConfig: {
@@ -62,7 +35,7 @@ class AddStore extends React.Component {
                         { value: 'FOS Beat Value 2', displayValue: 'FOS Beat Value 2' }
                     ]
                 },
-                value: 'fastest',
+                value: 'FOS Beat Value 1',
                 isValid: true
             },
             jioTertiary: {
@@ -146,7 +119,8 @@ class AddStore extends React.Component {
         },
         location: null,
         isMapVisible: false,
-        isFormValid: false
+        isFormValid: false,
+        isLoading: false
     }
 
     checkValidity(value, rules) {
@@ -164,11 +138,11 @@ class AddStore extends React.Component {
             isValid = value.trim(' ').length <= rules.maxLength && isValid;
         }
 
-        if(rules.min) {
+        if (rules.min) {
             isValid = parseInt(value.trim(' ')) >= rules.min && isValid;
         }
 
-        if(rules.max) {
+        if (rules.max) {
             isValid = parseInt(value.trim(' ')) <= rules.max && isValid;
         }
 
@@ -177,8 +151,12 @@ class AddStore extends React.Component {
 
     addStoreHandler = (event) => {
         event.preventDefault();
-        
-        console.log('addStoreHandler Called!!!');
+
+        this.setState({ 
+            isLoading: true,
+            isError: false,
+            errorMessage: ''
+        });
 
         let storeDetails = {};
         for (let formElementName in this.state.storeForm) {
@@ -186,14 +164,25 @@ class AddStore extends React.Component {
         }
 
         storeDetails.location = this.state.location;
+        storeDetails.addedBy = 'Unknown User';
 
         axios.post('/store', storeDetails)
-            .then(res => console.log(res))
-            .catch(err => console.error(err));
+            .then(res => {
+                alert('Details submitted successfully.\nThanks:)');
+                console.log(res);
+                this.props.history.push('/home');
+            })
+            .catch(err => {
+                alert('Something went wrong. Please try again later!');
+                this.setState({
+                    isLoading: false,
+                });
+                console.error(err);
+            });
     }
 
     inputChangeHandler = (event, inputIdentifier) => {
-        
+
         const updatedForm = {
             ...this.state.storeForm
         };
@@ -279,40 +268,42 @@ class AddStore extends React.Component {
         }
 
         let submitFormButton = <Button buttonType="Success" onClick={this.addStoreHandler}>Submit</Button>;
-        if(!this.state.isFormValid) {
+        if (!this.state.isFormValid) {
             submitFormButton = <Button buttonType="Success" disabled onClick={this.addStoreHandler}>Submit</Button>;
         }
-        let form = (
-            <form className={styleClasses.formWrapper}
-            // onSubmit={this.addStoreHandler}
-            >
-                <div className={styleClasses.form}>
-                    {
-                        formElementsArray.map(formElement => (
-                            <Input
-                                key={formElement.id}
-                                elementType={formElement.config.elementType}
-                                elementConfig={formElement.config.elementConfig}
-                                value={formElement.config.value}
-                                onChange={(event) => this.inputChangeHandler(event, formElement.id)}
-                                isValidationRequired={formElement.config.validation}
-                                valid={formElement.config.isValid}
-                                touched={formElement.config.isTouched}
-                            />
-                        ))
-                    }
-                </div>
-                <div className={styleClasses.map}>
-                    {map}
-                    <Button buttonType="Map" onClick={this.toggleMap}>
-                        {mapButtonText}
-                    </Button>
-                    {submitFormButton}
-                </div>
-
-            </form>);
-
-
+        let form = <Spinner />;
+        if(!this.state.isLoading) {
+            form = (
+                <form className={styleClasses.formWrapper}
+                // onSubmit={this.addStoreHandler}
+                >
+                    <div className={styleClasses.form}>
+                        {
+                            formElementsArray.map(formElement => (
+                                <Input
+                                    key={formElement.id}
+                                    elementType={formElement.config.elementType}
+                                    elementConfig={formElement.config.elementConfig}
+                                    value={formElement.config.value}
+                                    onChange={(event) => this.inputChangeHandler(event, formElement.id)}
+                                    isValidationRequired={formElement.config.validation}
+                                    valid={formElement.config.isValid}
+                                    touched={formElement.config.isTouched}
+                                />
+                            ))
+                        }
+                    </div>
+                    <div className={styleClasses.map}>
+                        {map}
+                        <Button buttonType="Map" onClick={this.toggleMap}>
+                            {mapButtonText}
+                        </Button>
+                        {submitFormButton}
+                    </div>
+    
+                </form>);
+        }
+        
         return (
             <div className={styleClasses.AddStore}>
                 <h1>Add Store</h1>
