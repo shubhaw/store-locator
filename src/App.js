@@ -16,7 +16,7 @@ class App extends React.Component {
                     <Layout>
                         <Switch>
                             <PrivateRoute path="/download-all" component={Stores} />
-                            <Route path="/" exact component={AddStore} />
+                            <PrivateRoute path="/" exact component={AddStore} />
                             <Route path="/login" exact component={Login} />
                             <Redirect to="/" />
                         </Switch>

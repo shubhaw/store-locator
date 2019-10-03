@@ -24,13 +24,18 @@
 
 .InputElement:focus {
     outline: none;
-    border: 1px solid #9fd2d8;
-    background-color: #e3fcff;
+    border: 1px solid #2e2f81;
+    /* background-color: #e3fcff; */
 }
 
 .Invalid {
     border: 2px solid #cc0000;
     background-color: #ff9999;
+}
+
+.InputGroupTypeText {
+    display: flex;
+    flex-direction: row;
 }
 
 @media screen and (min-width: 600px) {
