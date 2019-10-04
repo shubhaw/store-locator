@@ -11,14 +11,26 @@ class Login extends React.Component {
         loginForm: {
             phoneNumber: {
                 elementType: 'input-group',
-                elementConfig: {
+                prefixElementConfig: {
                     type: 'text',
-                    placeholder: 'Phone Number'
+                    value: '+91',
+                    readOnly: true,
+                    style: {
+                        backgroundColor: '#EEE',
+                        color: '#555',
+                        width: '60px',
+                        marginRight: '10px'
+                    }
+                },
+                elementConfig: {
+                    type: 'number',
+                    placeholder: 'Phone Number',
+                    readOnly: false
                 },
                 value: '',
                 validation: {
                     required: true,
-                    //length: 10
+                    length: 10
                 },
                 isValid: false,
                 isTouched: false
@@ -27,12 +39,16 @@ class Login extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    placeholder: 'OTP'
+                    placeholder: 'OTP',
+                    hidden: true,
+                    style: {
+                        textAlign: 'center'
+                    }
                 },
                 value: '',
                 validation: {
                     required: true,
-                    //length: 6
+                    length: 6
                 },
                 isValid: false,
                 isTouched: false,
@@ -102,44 +118,43 @@ class Login extends React.Component {
             .catch(error => console.error(error));
     }
 
-    // submitOTPHandler = (event) => {
-    //     event.preventDefault();
-    //     let phoneNumber = this.state.loginForm.phoneNumber.value;
-    //     let appVerifier = window.recaptchaVerifier;
-    //     firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
-    //         .then(confirmationResult => {
-    //             console.log('inside signInWithPhoneNumber');
-    //             console.log('----------------');
-    //             confirmationResult.confirm('123456').then(result => {
-    //                 // User signed in successfully.
-    //                 console.log('Signed in successfully!');
-    //                 console.log(result)
-    //                 console.log('----------------');
-    //             }).catch(function (error) {
-    //                 // User couldn't sign in (bad verification code?)
-    //             });
-    //             window.confirmationResult = confirmationResult;
-    //         })
-    //         .catch(error => console.error(error));
-    // }
-
     submitPhoneNumberHandler = (event) => {
         event.preventDefault();
 
-        let phoneNumber = this.state.loginForm.phoneNumber.value;
+        let phoneNumber = this.state.loginForm.phoneNumber.prefixElementConfig.value + this.state.loginForm.phoneNumber.value;
         let appVerifier = window.recaptchaVerifier;
         firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
             .then(confirmationResult => {
-                this.setState({
+                this.setState(prevState => ({
+                    loginForm: {
+                        ...prevState.loginForm,
+                        phoneNumber: {
+                            ...prevState.loginForm.phoneNumber,
+                            elementConfig: {
+                                ...prevState.loginForm.phoneNumber.elementConfig,
+                                readOnly: true,
+                                style: {
+                                    backgroundColor: '#EEE',
+                                    color: '#555',
+                                }
+                            }
+                        },
+                        otp: {
+                            ...prevState.loginForm.otp,
+                            elementConfig: {
+                                ...prevState.loginForm.otp.elementConfig,
+                                hidden: false
+                            }
+                        }
+                    },
                     confirmationResult,
-                    isPhoneNumberPresent: true
-                })
+                    isPhoneNumberPresent: true,
+                }))
             })
             .catch(error => console.error(error));
     }
 
     onSignInSubmit = () => {
-        // firebaseApp.auth().signInWithPhoneNumber()
         console.log('Inside onSignInSubmit');
         console.log('----------------');
     }
@@ -190,20 +205,26 @@ class Login extends React.Component {
                 <form
                 // onSubmit={this.submitOTPHandler}
                 >
-
                     {
-                        formElementsArray.map(formElement => (
-                            <Input
-                                key={formElement.id}
-                                elementType={formElement.config.elementType}
-                                elementConfig={formElement.config.elementConfig}
-                                value={formElement.config.value}
-                                onChange={(event) => this.inputChangeHandler(event, formElement.id)}
-                                isValidationRequired={formElement.config.validation}
-                                valid={formElement.config.isValid}
-                                touched={formElement.config.isTouched}
-                            />
-                        ))
+                        formElementsArray.map(formElement => {
+                            if (!formElement.config.elementConfig.hidden) {
+                                return (
+                                    <Input
+                                        key={formElement.id}
+                                        elementType={formElement.config.elementType}
+                                        elementConfig={formElement.config.elementConfig}
+                                        prefixElementConfig={formElement.config.prefixElementConfig}
+                                        value={formElement.config.value}
+                                        onChange={(event) => this.inputChangeHandler(event, formElement.id)}
+                                        isValidationRequired={formElement.config.validation}
+                                        valid={formElement.config.isValid}
+                                        touched={formElement.config.isTouched}
+                                    />
+                                )
+                            } else {
+                                return null;
+                            }
+                        })
                     }
                     {submitFormButton}
                 </form>);

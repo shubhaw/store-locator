@@ -17,8 +17,10 @@ const Input = (props) => {
         case ('input-group'):
             inputElement = (
                 <div className={styleClasses.InputGroupTypeText}>
-                    <input className={styleClasses.InputElement} type='text' value='+91' readOnly />
-                    <input className={inputClasses.join(' ')} {...props.elementConfig} value={props.value} onChange={props.onChange} readOnly />
+                    <input 
+                    className={styleClasses.InputElement}
+                        {...props.prefixElementConfig} />
+                    <input className={inputClasses.join(' ')} {...props.elementConfig} value={props.value} onChange={props.onChange} />
                 </div>
             )
             break;

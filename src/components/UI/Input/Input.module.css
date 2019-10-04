@@ -30,7 +30,7 @@
 
 .Invalid {
     border: 2px solid #cc0000;
-    background-color: #ff9999;
+    /* background-color: #ff9999; */
 }
 
 .InputGroupTypeText {
