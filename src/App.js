@@ -7,6 +7,7 @@ import AddStore from './containers/AddStore/AddStore';
 import Stores from './containers/Stores/Stores';
 import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 import Login from './containers/Login/Login';
+import CreateProfile from './containers/CreateProfile/CreateProfile';
 
 class App extends React.Component {
     render() {
@@ -18,6 +19,7 @@ class App extends React.Component {
                             <PrivateRoute path="/download-all" component={Stores} />
                             <PrivateRoute path="/" exact component={AddStore} />
                             <Route path="/login" exact component={Login} />
+                            <Route path="/create-profile" exact component={CreateProfile} />
                             <Redirect to="/" />
                         </Switch>
                     </Layout>

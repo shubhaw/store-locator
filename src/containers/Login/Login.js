@@ -114,6 +114,12 @@ class Login extends React.Component {
         confirmationResult.confirm(otp)
             .then(user => {
                 console.log(user);
+                console.log('[isNewUser]:', user.additionalUserInfo.isNewUser);
+                if(user && user.additionalUserInfo.isNewUser) {
+                    this.props.history.replace('/create-profile'); //replace as we don't want to navigate back to login and neither to '/'
+                } else {
+                    this.props.history.replace('/');
+                }
             })
             .catch(error => console.error(error));
     }
@@ -167,7 +173,7 @@ class Login extends React.Component {
                 console.log(response);
                 console.log('----------------');
                 // reCAPTCHA solved, allow signInWithPhoneNumber.
-                // this.onSignInSubmit();
+                this.onSignInSubmit();
             }
         });
 
