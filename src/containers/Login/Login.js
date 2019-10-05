@@ -1,9 +1,12 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { Redirect } from 'react-router-dom';
+import { UPDATE_USER } from '../../store/actions/actionTypes';
 import Spinner from '../../components/UI/Spinner/Spinner';
 import Input from '../../components/UI/Input/Input';
 import Button from '../../components/UI/Button/Button';
 import firebase from "firebase/app";
-import firebaseApp from '../../config/Firebase/firebase';
+
 
 class Login extends React.Component {
 
@@ -113,10 +116,16 @@ class Login extends React.Component {
         const otp = this.state.loginForm.otp.value;
         confirmationResult.confirm(otp)
             .then(user => {
-                console.log(user);
-                console.log('[isNewUser]:', user.additionalUserInfo.isNewUser);
-                if(user && user.additionalUserInfo.isNewUser) {
-                    this.props.history.replace('/create-profile'); //replace as we don't want to navigate back to login and neither to '/'
+                const userDetails = {
+                    name: user.user.displayName,
+                    phoneNumber: user.user.phoneNumber
+                }
+                const isNewUser = user.additionalUserInfo.isNewUser;
+                console.log('[Login] isNewUser:', isNewUser);
+
+                this.props.updateUser(userDetails, isNewUser);
+                if (user && isNewUser) {
+                    this.props.history.replace('/create-profile');
                 } else {
                     this.props.history.replace('/');
                 }
@@ -176,17 +185,14 @@ class Login extends React.Component {
                 this.onSignInSubmit();
             }
         });
-
-        firebaseApp.auth().onAuthStateChanged(user => {
-            if (user) {
-                console.log('[componentDidMount] user found');
-                console.log(user);
-                console.log('----------------');
-                this.props.history.push('/');
-            }
-        });
     }
+
     render() {
+
+        if (this.props.isAuthenticated) {
+            return <Redirect to='/' />
+        }
+
         let formElementsArray = [];
         for (let key in this.state.loginForm) {
             formElementsArray.push({
@@ -201,16 +207,11 @@ class Login extends React.Component {
             submitFormButton = <Button buttonType="Success" onClick={this.submitOTPHandler}>Submit OTP</Button>;
         }
 
-        // if (!this.state.isFormValid) {
-        //     submitFormButton = <Button buttonType="Success" disabled>Submit</Button>;
-        // }
 
         let form = <Spinner />;
         if (!this.state.isLoading) {
             form = (
-                <form
-                // onSubmit={this.submitOTPHandler}
-                >
+                <form>
                     {
                         formElementsArray.map(formElement => {
                             if (!formElement.config.elementConfig.hidden) {
@@ -245,4 +246,16 @@ class Login extends React.Component {
     }
 }
 
-export default Login;
+const mapStateToProps = state => {
+    return {
+        isAuthenticated: state.isAuthenticated
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        updateUser: userDetails => dispatch({ type: UPDATE_USER, user: userDetails })
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(Login);
