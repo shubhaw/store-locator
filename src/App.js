@@ -10,6 +10,7 @@ import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 import Login from './containers/Login/Login';
 import CreateProfile from './containers/CreateProfile/CreateProfile';
 import firebaseApp from './config/Firebase/firebase';
+import AddFSE from './containers/AddFSE/AddFSE';
 
 class App extends React.Component {
 
@@ -25,10 +26,12 @@ class App extends React.Component {
             <BrowserRouter>
                 <Layout>
                     <Switch>
+                        <Route path='/add-fse' exact component={AddFSE} />
                         <PrivateRoute path="/download-all" component={Stores} />
                         <PrivateRoute path="/" exact component={AddStore} />
                         <Route path="/login" exact component={Login} />
                         <PrivateRoute path="/create-profile" exact component={CreateProfile} />
+                        
                         <Redirect to="/" />
                     </Switch>
                 </Layout>
