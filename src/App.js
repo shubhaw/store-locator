@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Switch, Route, Redirect } from 'react-router-dom';
 import { connect } from 'react-redux';
-import { UPDATE_USER } from './store/actions/actionTypes';
+import { UPDATE_USER, RESET_STATE } from './store/actions/actionTypes';
 import './App.css';
 import Layout from './containers/Layout/Layout';
 import AddStore from './containers/AddStore/AddStore';
@@ -10,14 +10,19 @@ import PrivateRoute from './components/PrivateRoute/PrivateRoute';
 import Login from './containers/Login/Login';
 import CreateProfile from './containers/CreateProfile/CreateProfile';
 import firebaseApp from './config/Firebase/firebase';
-import AddFSE from './containers/AddFSE/AddFSE';
+import AddFSE from './containers/FSE/AddFSE/AddFSE';
+import ViewFSEs from './containers/FSE/ViewFSEs/ViewFSEs';
 
 class App extends React.Component {
 
     componentDidMount() {
+        this.props.resetState();
         firebaseApp.auth().onAuthStateChanged(user => {
-            this.props.updateUser(user);
-        })
+            this.props.updateUser({
+                name: user.displayName,
+                phoneNumber: user.phoneNumber
+            });
+        });
     }
 
     render() {
@@ -31,7 +36,7 @@ class App extends React.Component {
                         <PrivateRoute path="/" exact component={AddStore} />
                         <Route path="/login" exact component={Login} />
                         <PrivateRoute path="/create-profile" exact component={CreateProfile} />
-                        
+                        <PrivateRoute path='/view-fses' exact component={ViewFSEs} />
                         <Redirect to="/" />
                     </Switch>
                 </Layout>
@@ -50,7 +55,8 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        updateUser: (user) => dispatch({ type: UPDATE_USER, user: user })
+        updateUser: (user) => dispatch({ type: UPDATE_USER, user: user }),
+        resetState: () => dispatch({ type: RESET_STATE })
     }
 }
 

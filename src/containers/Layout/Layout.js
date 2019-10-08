@@ -8,6 +8,7 @@ import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
+import GroupIcon from '@material-ui/icons/Group';
 import TopBar from '../../components/UI/Navigation/TopBar/TopBar';
 
 class Layout extends React.Component {
@@ -34,6 +35,11 @@ class Layout extends React.Component {
                 icon: <PersonAddIcon />
             },
             {
+                to: '/view-fses',
+                text: 'View FSEs',
+                icon: <GroupIcon />
+            },
+            {
                 to: '/login',
                 text: 'Login',
                 icon: <VpnKeyIcon />
@@ -55,15 +61,14 @@ class Layout extends React.Component {
     }
 
     render() {
-        console.log('[Layout] props: ', this.props);
         return (
-            <div className={styleClasses.Layout}>
+            <React.Fragment>
                 <TopBar drawerToggleHandler={this.drawerToggleHandler} />
                 <Sidebar show={this.state.isSideDrawerVisible} links={this.state.links} drawerCloseHandler={this.drawerToggleHandler} />
-                <div style={{marginTop: '70px'}}>
+                <div className={styleClasses.Layout}>
                     {this.props.children}
                 </div>
-            </div>
+            </React.Fragment>
         )
     }
 }
