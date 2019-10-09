@@ -3,13 +3,18 @@ import {
     ADD_FSE_SUCCESS,
     ADD_FSE_FAILURE,
     SET_IS_LOADING,
-    SET_FSE_LIST
+    SET_FSE_LIST,
+    ADD_STORE_SUCCESS,
+    ADD_STORE_FAILURE,
+    UPDATE_MANAGER_ID
 } from './actionTypes';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 
 const USER_COLLECTION = 'users';
 const TM_COLLECTION = 'TMs';
+const FSE_COLLECTION = 'FSEs';
+const ENTRIES_SUB_COLLECTION = 'entries';
 
 export const addUserInFirestore = userDetails => {
     return dispacth => {
@@ -108,3 +113,52 @@ const setFseList = fseList => {
         fseList
     }
 }
+
+export const addStoreToFirestore = (storeDetails, fseId) => {
+    return dispatch => {
+        dispatch(setIsLoading(true));
+        const db = firebase.firestore();
+        db.collection(FSE_COLLECTION).doc(fseId).collection(ENTRIES_SUB_COLLECTION)
+            .add(storeDetails)
+            .then(docSnapshot => {
+                return dispatch(addStoreSuccess())
+            })
+            .catch(error => dispatch(addStoreFailure(error)));
+    }
+}
+
+const addStoreSuccess = () => {
+    return {
+        type: ADD_STORE_SUCCESS
+    }
+}
+
+const addStoreFailure = error => {
+    return {
+        type: ADD_STORE_FAILURE,
+        error
+    }
+}
+
+export const fetchMember = fseId => {
+    return dispatch => {
+        const db = firebase.firestore();
+        db.collection(TM_COLLECTION).where('fseList', 'array-contains', fseId)
+            .get()
+            .then(querySnapshot => {
+                querySnapshot.forEach(doc => {
+                    if(doc.exists) {
+                        dispatch(updateManagerId(doc.id));
+                        console.log('Manager Id:', doc.id);
+                        console.log('Manager Name:', doc.data().name);
+                    }
+                })
+            })
+            .catch(err => console.error(err))
+    }
+}
+
+const updateManagerId = managerId => ({
+    type: UPDATE_MANAGER_ID,
+    managerId
+})

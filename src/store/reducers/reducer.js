@@ -5,7 +5,10 @@ import {
     ADD_FSE_FAILURE,
     SET_IS_LOADING,
     RESET_STATE,
-    SET_FSE_LIST
+    SET_FSE_LIST,
+    ADD_STORE_SUCCESS,
+    ADD_STORE_FAILURE,
+    UPDATE_MANAGER_ID
 } from '../actions/actionTypes';
 
 const initialState = {
@@ -23,7 +26,10 @@ export const reducer = (state = initialState, action) => {
             if (action.user) {
                 return {
                     ...state,
-                    user: action.user,
+                    user: {
+                        ...state.user,
+                        ...action.user
+                    },
                     isAuthenticated: true
                 }
             } else {
@@ -32,7 +38,10 @@ export const reducer = (state = initialState, action) => {
         case CREATE_PROFILE:
             return {
                 ...state,
-                user: action.userDetails,
+                user: {
+                    ...state.user,
+                    ...action.userDetails
+                },
                 isNewUser: false
             }
         case ADD_FSE_SUCCESS:
@@ -43,7 +52,8 @@ export const reducer = (state = initialState, action) => {
         case ADD_FSE_FAILURE:
             return {
                 ...state,
-                error: action.error
+                error: action.error,
+                isLoading: false
             };
         case SET_IS_LOADING:
             return {
@@ -61,6 +71,25 @@ export const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 fseList: action.fseList
+            }
+        case ADD_STORE_SUCCESS:
+            return {
+                ...state,
+                isSuccessful: true
+            }
+        case ADD_STORE_FAILURE:
+            return {
+                ...state,
+                error: action.error,
+                isLoading: false
+            }
+            case UPDATE_MANAGER_ID: 
+            return {
+                ...state,
+                user: {
+                    ...state.user,
+                    managerId: action.managerId
+                }
             }
         default:
             return state;

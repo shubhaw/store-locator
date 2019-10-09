@@ -3,8 +3,8 @@ import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
 import { UPDATE_USER } from '../../store/actions/actionTypes';
 import Spinner from '../../components/UI/Spinner/Spinner';
-import Input from '../../components/UI/Input/Input';
-import Button from '../../components/UI/Button/Button';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
 import firebase from "firebase/app";
 
 
@@ -12,23 +12,18 @@ class Login extends React.Component {
 
     state = {
         loginForm: {
-            phoneNumber: {
-                elementType: 'input-group',
-                prefixElementConfig: {
-                    type: 'text',
-                    value: '+91',
-                    readOnly: true,
-                    style: {
-                        backgroundColor: '#EEE',
-                        color: '#555',
-                        width: '60px',
-                        marginRight: '10px'
-                    }
-                },
+            lapuNumber: {
+                elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    placeholder: 'Phone Number',
-                    readOnly: false
+                    label: 'LAPU Number',
+                    placeholder: 'LAPU Number',
+                    required: true
+                },
+                inputProps: {
+                    readOnly: false,
+                    min: 1000000000,
+                    max: 9999999999
                 },
                 value: '',
                 validation: {
@@ -212,29 +207,45 @@ class Login extends React.Component {
         if (!this.state.isLoading) {
             form = (
                 <form>
-                    {
-                        formElementsArray.map(formElement => {
-                            if (!formElement.config.elementConfig.hidden) {
-                                return (
-                                    <Input
-                                        key={formElement.id}
-                                        elementType={formElement.config.elementType}
-                                        elementConfig={formElement.config.elementConfig}
-                                        prefixElementConfig={formElement.config.prefixElementConfig}
-                                        value={formElement.config.value}
-                                        onChange={(event) => this.inputChangeHandler(event, formElement.id)}
-                                        isValidationRequired={formElement.config.validation}
-                                        valid={formElement.config.isValid}
-                                        touched={formElement.config.isTouched}
-                                    />
-                                )
-                            } else {
-                                return null;
-                            }
-                        })
-                    }
-                    {submitFormButton}
-                </form>);
+                    <TextField
+                        {...this.state.loginForm.lapuNumber.elementConfig}
+                        value={this.state.loginForm.lapuNumber.value}
+                        onChange={(event) => this.inputChangeHandler(event, this.state.loginForm.lapuNumber)}
+                        fullWidth
+                        inputProps={this.state.loginForm.lapuNumber.inputProps}
+                        variant="outlined"
+                        margin="dense"
+                    />
+                    <Button variant="contained" color="primary" fullWidth type="submit" style={{margin: '15px 0'}}>Request OTP</Button>
+                </form>
+            )
+            //#region old form
+            // form = (
+            //     <form>
+            //         {
+            //             formElementsArray.map(formElement => {
+            //                 if (!formElement.config.elementConfig.hidden) {
+            //                     return (
+            //                         <Input
+            //                             key={formElement.id}
+            //                             elementType={formElement.config.elementType}
+            //                             elementConfig={formElement.config.elementConfig}
+            //                             prefixElementConfig={formElement.config.prefixElementConfig}
+            //                             value={formElement.config.value}
+            //                             onChange={(event) => this.inputChangeHandler(event, formElement.id)}
+            //                             isValidationRequired={formElement.config.validation}
+            //                             valid={formElement.config.isValid}
+            //                             touched={formElement.config.isTouched}
+            //                         />
+            //                     )
+            //                 } else {
+            //                     return null;
+            //                 }
+            //             })
+            //         }
+            //         {submitFormButton}
+            //     </form>);
+            //#endregion
         }
 
         return (

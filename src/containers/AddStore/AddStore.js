@@ -1,10 +1,12 @@
 import React from 'react';
+import { connect } from 'react-redux';
+import { addStoreToFirestore, fetchMember } from '../../store/actions/actions';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
 import styleClasses from './AddStore.module.css';
-import Input from '../../components/UI/Input/Input';
-import Button from '../../components/UI/Button/Button';
 import Map from '../../components/Map/Map';
 import Spinner from '../../components/UI/Spinner/Spinner';
-import axios from '../../axios';
+// import axios from '../../axios';
 
 class AddStore extends React.Component {
     state = {
@@ -13,7 +15,12 @@ class AddStore extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
+                    label: 'Retailer LAPU Number',
                     placeholder: 'Retailer LAPU Number',
+                    required: true
+                },
+                inputProps: {
+                    readOnly: false,
                     min: 1000000000,
                     max: 9999999999
                 },
@@ -27,22 +34,29 @@ class AddStore extends React.Component {
                 isTouched: false
             },
             FOSBeat: {
-                elementType: 'select',
+                elementType: 'input',
                 elementConfig: {
+                    type: 'number',
+                    label: 'FOS Beat',
                     placeholder: 'FOS Beat',
-                    options: [
-                        { value: 'FOS Beat Value 1', displayValue: 'FOS Beat Value 1' },
-                        { value: 'FOS Beat Value 2', displayValue: 'FOS Beat Value 2' }
-                    ]
+                    required: true
                 },
-                value: 'FOS Beat Value 1',
+                inputProps: {
+                    readOnly: true
+                },
+                value: '',
                 isValid: true
             },
             jioTertiary: {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    placeholder: 'Jio Tertiary'
+                    label: 'Jio Tertiary',
+                    placeholder: 'Jio Tertiary',
+                    required: true
+                },
+                inputProps: {
+                    readOnly: false
                 },
                 value: '',
                 validation: {
@@ -55,7 +69,12 @@ class AddStore extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    placeholder: 'Jio Gross'
+                    label: 'Jio Gross',
+                    placeholder: 'Jio Gross',
+                    required: true
+                },
+                inputProps: {
+                    readOnly: false
                 },
                 value: '',
                 validation: {
@@ -68,7 +87,12 @@ class AddStore extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    placeholder: 'Vodafone Tertiary'
+                    label: 'Vodafone Tertiary',
+                    placeholder: 'Vodafone Tertiary',
+                    required: true
+                },
+                inputProps: {
+                    readOnly: false
                 },
                 value: '',
                 validation: {
@@ -81,7 +105,12 @@ class AddStore extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    placeholder: 'Vodafone Gross'
+                    label: 'Vodafone Gross',
+                    placeholder: 'Vodafone Gross',
+                    required: true
+                },
+                inputProps: {
+                    readOnly: false
                 },
                 value: '',
                 validation: {
@@ -94,7 +123,12 @@ class AddStore extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    placeholder: 'Idea Tertiary'
+                    label: 'Idea Tertiary',
+                    placeholder: 'Idea Tertiary',
+                    required: true
+                },
+                inputProps: {
+                    readOnly: false
                 },
                 value: '',
                 validation: {
@@ -107,7 +141,12 @@ class AddStore extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    placeholder: 'Idea Gross'
+                    label: 'Idea Gross',
+                    placeholder: 'Idea Gross',
+                    required: true
+                },
+                inputProps: {
+                    readOnly: false
                 },
                 value: '',
                 validation: {
@@ -152,7 +191,7 @@ class AddStore extends React.Component {
     addStoreHandler = (event) => {
         event.preventDefault();
 
-        this.setState({ 
+        this.setState({
             isLoading: true,
             isError: false,
             errorMessage: ''
@@ -164,21 +203,27 @@ class AddStore extends React.Component {
         }
 
         storeDetails.location = this.state.location;
-        storeDetails.addedBy = 'Unknown User';
+        storeDetails.addedBy = this.props.userId;
+        storeDetails.managerId = 'Raman Singh';
+        //add manager name to store while logging in
 
-        axios.post('/store', storeDetails)
-            .then(res => {
-                alert('Details submitted successfully.\nThanks:)');
-                console.log(res);
-                this.props.history.push('/home');
-            })
-            .catch(err => {
-                alert('Something went wrong. Please try again later!');
-                this.setState({
-                    isLoading: false,
-                });
-                console.error(err);
-            });
+        this.props.addStoreInDb(storeDetails, this.props.userId);
+
+        //#region axios
+        // axios.post('/store', storeDetails)
+        //     .then(res => {
+        //         alert('Details submitted successfully.\nThanks:)');
+        //         console.log(res);
+        //         this.props.history.push('/home');
+        //     })
+        //     .catch(err => {
+        //         alert('Something went wrong. Please try again later!');
+        //         this.setState({
+        //             isLoading: false,
+        //         });
+        //         console.error(err);
+        //     });
+        //#endregion
     }
 
     inputChangeHandler = (event, inputIdentifier) => {
@@ -243,7 +288,24 @@ class AddStore extends React.Component {
     }
 
     componentDidMount() {
+        const FOSBeatValue = this.props.userId.substr(3);
+        this.setState(prevState => ({
+            ...prevState,
+            storeForm: {
+                ...prevState.storeForm,
+                FOSBeat: {
+                    ...prevState.storeForm.FOSBeat,
+                    value: Number(FOSBeatValue)
+                }
+            }
+        }));
+
         this.fetchCurrentLocation();
+        
+        if(this.props.userId) {
+            console.log('userId:', this.props.userId)
+            this.props.fetchMember(9999999999);
+        }
     }
 
     toggleMap = (event) => {
@@ -272,38 +334,65 @@ class AddStore extends React.Component {
             submitFormButton = <Button buttonType="Success" disabled onClick={this.addStoreHandler}>Submit</Button>;
         }
         let form = <Spinner />;
-        if(!this.state.isLoading) {
+
+        if (!this.state.isLoading) {
             form = (
-                <form className={styleClasses.formWrapper}
-                // onSubmit={this.addStoreHandler}
-                >
-                    <div className={styleClasses.form}>
-                        {
-                            formElementsArray.map(formElement => (
-                                <Input
-                                    key={formElement.id}
-                                    elementType={formElement.config.elementType}
-                                    elementConfig={formElement.config.elementConfig}
+                <form onSubmit={this.addStoreHandler}>
+                    {
+                        formElementsArray.map((formElement, index) => (
+                            <TextField
+                            error={!formElement.config.isValid}
+                                    key={index}
+                                    {...formElement.config.elementConfig}
+                                    variant="outlined"
+                                    margin="dense"
+                                    style={{margin: '10px 0'}}
+                                    fullWidth
+                                    inputProps={formElement.config.inputProps}
                                     value={formElement.config.value}
                                     onChange={(event) => this.inputChangeHandler(event, formElement.id)}
-                                    isValidationRequired={formElement.config.validation}
-                                    valid={formElement.config.isValid}
-                                    touched={formElement.config.isTouched}
                                 />
-                            ))
-                        }
-                    </div>
-                    <div className={styleClasses.map}>
-                        {map}
-                        <Button buttonType="Map" onClick={this.toggleMap}>
-                            {mapButtonText}
-                        </Button>
-                        {submitFormButton}
-                    </div>
-    
-                </form>);
+                        ))
+                    }
+                    <Button variant="contained" color="primary" fullWidth type="submit" style={{margin: '15px 0'}}>
+                        Submit
+                    </Button>
+                </form>
+            )
+            
+            //#region old form
+            // form = (
+            //     <form className={styleClasses.formWrapper}
+            //     // onSubmit={this.addStoreHandler}
+            //     >
+            //         <div className={styleClasses.form}>
+            //             {
+            //                 formElementsArray.map(formElement => (
+            //                     <Input
+            //                         key={formElement.id}
+            //                         elementType={formElement.config.elementType}
+            //                         elementConfig={formElement.config.elementConfig}
+            //                         value={formElement.config.value}
+            //                         onChange={(event) => this.inputChangeHandler(event, formElement.id)}
+            //                         isValidationRequired={formElement.config.validation}
+            //                         valid={formElement.config.isValid}
+            //                         touched={formElement.config.isTouched}
+            //                     />
+            //                 ))
+            //             }
+            //         </div>
+            //         <div className={styleClasses.map}>
+            //             {map}
+            //             <Button buttonType="Map" onClick={this.toggleMap}>
+            //                 {mapButtonText}
+            //             </Button>
+            //             {submitFormButton}
+            //         </div>
+
+            //     </form>);
+            //#endregion
         }
-        
+
         return (
             <div className={styleClasses.AddStore}>
                 <h1>Add Store</h1>
@@ -313,4 +402,20 @@ class AddStore extends React.Component {
     }
 }
 
-export default AddStore;
+const mapStateToProps = state => {
+    return {
+        userId: state.user? state.user.phoneNumber: null,
+        isLoading: state.isLoading,
+        isSuccessful: state.isSuccessful,
+        error: state.error
+    }
+}
+
+const mapDispatchToProps = dispatch => {
+    return {
+        addStoreInDb: (storeDetails, fseId) => dispatch(addStoreToFirestore(storeDetails, fseId)),
+        fetchMember: (fseId) => dispatch(fetchMember(fseId))
+    }
+}
+
+export default connect(mapStateToProps, mapDispatchToProps)(AddStore);
