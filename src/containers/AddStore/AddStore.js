@@ -1,6 +1,6 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { addStoreToFirestore, fetchMember } from '../../store/actions/actions';
+import { addStoreToFirestore } from '../../store/actions/actions';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import styleClasses from './AddStore.module.css';
@@ -304,7 +304,7 @@ class AddStore extends React.Component {
         
         if(this.props.userId) {
             console.log('userId:', this.props.userId)
-            this.props.fetchMember(9999999999);
+            //this.props.fetchMember(9999999999);
         }
     }
 
@@ -341,7 +341,7 @@ class AddStore extends React.Component {
                     {
                         formElementsArray.map((formElement, index) => (
                             <TextField
-                            error={!formElement.config.isValid}
+                                    error={formElement.config.isTouched || !(formElement.config.isTouched && formElement.config.isValid)}
                                     key={index}
                                     {...formElement.config.elementConfig}
                                     variant="outlined"
@@ -413,8 +413,7 @@ const mapStateToProps = state => {
 
 const mapDispatchToProps = dispatch => {
     return {
-        addStoreInDb: (storeDetails, fseId) => dispatch(addStoreToFirestore(storeDetails, fseId)),
-        fetchMember: (fseId) => dispatch(fetchMember(fseId))
+        addStoreInDb: (storeDetails, fseId) => dispatch(addStoreToFirestore(storeDetails, fseId))
     }
 }
 

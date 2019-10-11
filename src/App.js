@@ -12,6 +12,8 @@ import CreateProfile from './containers/CreateProfile/CreateProfile';
 import firebaseApp from './config/Firebase/firebase';
 import AddFSE from './containers/FSE/AddFSE/AddFSE';
 import ViewFSEs from './containers/FSE/ViewFSEs/ViewFSEs';
+import TestContainer from './containers/TestContainer/TestContainer';
+import LoginNew from './containers/Login/LoginNew';
 
 class App extends React.Component {
 
@@ -33,10 +35,12 @@ class App extends React.Component {
                     <Switch>
                         <Route path='/add-fse' exact component={AddFSE} />
                         <PrivateRoute path="/download-all" component={Stores} />
-                        <PrivateRoute path="/" exact component={AddStore} />
+                        <Route path="/" exact component={AddStore} />
                         <Route path="/login" exact component={Login} />
+                        <Route path="/login-new" exact component={LoginNew} />
                         <PrivateRoute path="/create-profile" exact component={CreateProfile} />
                         <PrivateRoute path='/view-fses' exact component={ViewFSEs} />
+                        <Route path='/test' exact component={TestContainer} />
                         <Redirect to="/" />
                     </Switch>
                 </Layout>

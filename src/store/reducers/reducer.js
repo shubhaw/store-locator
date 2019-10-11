@@ -8,7 +8,9 @@ import {
     SET_FSE_LIST,
     ADD_STORE_SUCCESS,
     ADD_STORE_FAILURE,
-    UPDATE_MANAGER_ID
+    UPDATE_MANAGER_ID,
+    MAKE_SNACKBAR_VISIBLE,
+    MAKE_SNACKBAR_INVISIBLE
 } from '../actions/actionTypes';
 
 const initialState = {
@@ -17,7 +19,8 @@ const initialState = {
     isNewUser: false,
     error: null,
     isSuccessful: false,
-    isLoading: false
+    isLoading: false,
+    isSnackbarVisible: false
 }
 
 export const reducer = (state = initialState, action) => {
@@ -65,7 +68,8 @@ export const reducer = (state = initialState, action) => {
                 ...state,
                 isSuccessful: false,
                 error: null,
-                isLoading: false
+                isLoading: false,
+                isSnackbarVisible: false
             }
         case SET_FSE_LIST:
             return {
@@ -83,13 +87,23 @@ export const reducer = (state = initialState, action) => {
                 error: action.error,
                 isLoading: false
             }
-            case UPDATE_MANAGER_ID: 
+        case UPDATE_MANAGER_ID:
             return {
                 ...state,
                 user: {
                     ...state.user,
                     managerId: action.managerId
                 }
+            }
+        case MAKE_SNACKBAR_VISIBLE:
+            return {
+                ...state,
+                isSnackbarVisible: true
+            }
+        case MAKE_SNACKBAR_INVISIBLE:
+            return {
+                ...state,
+                isSnackbarVisible: false
             }
         default:
             return state;

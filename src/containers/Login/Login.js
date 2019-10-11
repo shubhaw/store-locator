@@ -190,6 +190,7 @@ class Login extends React.Component {
 
         let formElementsArray = [];
         for (let key in this.state.loginForm) {
+            console.log(key);
             formElementsArray.push({
                 id: key,
                 config: this.state.loginForm[key]
@@ -203,14 +204,14 @@ class Login extends React.Component {
         }
 
 
-        let form = <Spinner />;
+        let lapuNumberForm = <Spinner />;
         if (!this.state.isLoading) {
-            form = (
+            lapuNumberForm = (
                 <form>
                     <TextField
                         {...this.state.loginForm.lapuNumber.elementConfig}
                         value={this.state.loginForm.lapuNumber.value}
-                        onChange={(event) => this.inputChangeHandler(event, this.state.loginForm.lapuNumber)}
+                        onChange={(event) => this.inputChangeHandler(event, 'lapuNumber')}
                         fullWidth
                         inputProps={this.state.loginForm.lapuNumber.inputProps}
                         variant="outlined"
@@ -248,10 +249,26 @@ class Login extends React.Component {
             //#endregion
         }
 
+        let otpForm = (
+            <form>
+                <TextField />
+                <Button 
+                    variant="contained" 
+                    color="primary" 
+                    fullWidth
+                    type="submit"
+                    style={{margin: '15px 0'}}
+                >
+                    Submit OTP
+                </Button>
+            </form>
+        )
+
         return (
             <div>
                 <div id='sign-in-button'></div>
-                {form}
+                {lapuNumberForm}
+                {otpForm}
             </div>
         )
     }

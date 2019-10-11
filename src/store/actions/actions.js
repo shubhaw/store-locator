@@ -140,21 +140,22 @@ const addStoreFailure = error => {
     }
 }
 
-export const fetchMember = fseId => {
+export const checkFSEinFirestore = fseId => {
     return dispatch => {
+        // return dispatch(updateManagerId('doc.id'));
         const db = firebase.firestore();
         db.collection(TM_COLLECTION).where('fseList', 'array-contains', fseId)
             .get()
             .then(querySnapshot => {
                 querySnapshot.forEach(doc => {
                     if(doc.exists) {
-                        dispatch(updateManagerId(doc.id));
                         console.log('Manager Id:', doc.id);
                         console.log('Manager Name:', doc.data().name);
+                        return dispatch(updateManagerId(doc.id));
                     }
                 })
             })
-            .catch(err => console.error(err))
+            .catch(err => console.error(err));
     }
 }
 
