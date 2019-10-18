@@ -10,7 +10,9 @@ import {
     ADD_STORE_FAILURE,
     UPDATE_MANAGER_ID,
     MAKE_SNACKBAR_VISIBLE,
-    MAKE_SNACKBAR_INVISIBLE
+    MAKE_SNACKBAR_INVISIBLE,
+    SET_ERROR,
+    CLEAR_ERROR
 } from '../actions/actionTypes';
 
 const initialState = {
@@ -104,6 +106,16 @@ export const reducer = (state = initialState, action) => {
             return {
                 ...state,
                 isSnackbarVisible: false
+            }
+        case SET_ERROR:
+            return {
+                ...state,
+                error: action.error
+            }
+        case CLEAR_ERROR:
+            return {
+                ...state,
+                error: null
             }
         default:
             return state;

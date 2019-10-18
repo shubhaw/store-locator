@@ -6,7 +6,9 @@ import {
     SET_FSE_LIST,
     ADD_STORE_SUCCESS,
     ADD_STORE_FAILURE,
-    UPDATE_MANAGER_ID
+    UPDATE_MANAGER_ID,
+    SET_ERROR,
+    CLEAR_ERROR
 } from './actionTypes';
 import firebase from 'firebase/app';
 import 'firebase/firestore';
@@ -142,15 +144,22 @@ const addStoreFailure = error => {
 
 export const checkFSEinFirestore = fseId => {
     return dispatch => {
+        dispatch(clearError());
         // return dispatch(updateManagerId('doc.id'));
         const db = firebase.firestore();
-        db.collection(TM_COLLECTION).where('fseList', 'array-contains', fseId)
+        console.log('[checkFSEinFirestore] lapuNumber:', fseId);
+        db.collection(TM_COLLECTION).where('fseList', 'array-contains', Number(fseId))
             .get()
             .then(querySnapshot => {
+                console.log('inside then', querySnapshot);
+                if(querySnapshot.empty) {
+                    return dispatch(setError('LAPU Number is not valid!'));
+                }
                 querySnapshot.forEach(doc => {
                     if(doc.exists) {
                         console.log('Manager Id:', doc.id);
                         console.log('Manager Name:', doc.data().name);
+                        console.log('------------------------------');
                         return dispatch(updateManagerId(doc.id));
                     }
                 })
@@ -162,4 +171,13 @@ export const checkFSEinFirestore = fseId => {
 const updateManagerId = managerId => ({
     type: UPDATE_MANAGER_ID,
     managerId
+})
+
+const setError = error => ({
+    type: SET_ERROR,
+    error
+})
+
+const clearError = () => ({
+    type: CLEAR_ERROR
 })

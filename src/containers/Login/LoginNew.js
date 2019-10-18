@@ -3,6 +3,8 @@ import { connect } from 'react-redux';
 import { Typography, Grid, Switch, Button, TextField } from '@material-ui/core';
 import { checkFSEinFirestore } from '../../store/actions/actions';
 import firebase from "firebase/app";
+import { UPDATE_USER } from '../../store/actions/actionTypes';
+import Error from '../../components/UI/Error/Error';
 
 class Login extends React.Component {
 
@@ -112,7 +114,7 @@ class Login extends React.Component {
     submitOTPHandler = (event) => {
         event.preventDefault();
         const { confirmationResult } = this.state;
-        const otp = this.state.loginForm.otp.value;
+        const otp = this.state.otp.value;
         confirmationResult.confirm(otp)
             .then(user => {
                 const userDetails = {
@@ -141,6 +143,7 @@ class Login extends React.Component {
                         <Switch
                             checked={this.state.isTM}
                             color="default"
+                            disabled={this.props.isFseLapuNumberValid}
                             onChange={this.fseOrTmSwitchHandler}
                         />
                     </Grid>
@@ -221,6 +224,7 @@ class Login extends React.Component {
                 {fseOrTmSwitch}
                 {lapuNumberForm}
                 {otpForm}
+                <Error text={this.props.error} />
             </React.Fragment>
         )
     }
@@ -232,7 +236,8 @@ const mapStateToProps = state => ({
 });
 
 const mapDispatchToProps = dispatch => ({
-    isFSEValid: lapuNumber => dispatch(checkFSEinFirestore(lapuNumber))
+    isFSEValid: lapuNumber => dispatch(checkFSEinFirestore(lapuNumber)),
+    updateUser: (userDetails, isNewUser) => dispatch({type: UPDATE_USER, user: userDetails})
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);
