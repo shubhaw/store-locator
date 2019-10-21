@@ -1,20 +1,29 @@
 import React from 'react';
-import {Link} from 'react-router-dom';
 import styleClasses from './Layout.module.css';
+import Sidebar from '../../components/UI/Navigation/Sidebar/Sidebar';
+import TopBar from '../../components/UI/Navigation/TopBar/TopBar';
+
 
 class Layout extends React.Component {
-    
+    state = {
+        isSideDrawerVisible: false
+    }
+
+    drawerToggleHandler = () => {
+        this.setState(prevState => ({
+            isSideDrawerVisible: !prevState.isSideDrawerVisible
+        }))
+    }
+
     render() {
-        
         return (
-            <div className={styleClasses.Layout}>
-                {/* <h1>Store Locator</h1> */}
-                <Link to='/'>Home </Link>
-                <Link to='/download-all'> Download All </Link>
-                <Link to='/create-profile'> Create Profile </Link>
-                <Link to='/login'> Login </Link>
-                {this.props.children}
-            </div>
+            <React.Fragment>
+                <TopBar drawerToggleHandler={this.drawerToggleHandler} />
+                <Sidebar show={this.state.isSideDrawerVisible} links={this.state.links} drawerCloseHandler={this.drawerToggleHandler} />
+                <div className={styleClasses.Layout}>
+                    {this.props.children}
+                </div>
+            </React.Fragment>
         )
     }
 }

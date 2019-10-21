@@ -1,180 +1,77 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { Redirect } from 'react-router-dom';
-import { UPDATE_USER } from '../../store/actions/actionTypes';
-import Spinner from '../../components/UI/Spinner/Spinner';
-import Input from '../../components/UI/Input/Input';
-import Button from '../../components/UI/Button/Button';
+import { Typography, Grid, Switch, Button, TextField } from '@material-ui/core';
+import { checkFSEinFirestore, checkTMinFirestore } from '../../store/actions/actions';
 import firebase from "firebase/app";
-
+import { UPDATE_USER } from '../../store/actions/actionTypes';
+import Error from '../../components/UI/Error/Error';
 
 class Login extends React.Component {
 
     state = {
-        loginForm: {
-            phoneNumber: {
-                elementType: 'input-group',
-                prefixElementConfig: {
-                    type: 'text',
-                    value: '+91',
-                    readOnly: true,
-                    style: {
-                        backgroundColor: '#EEE',
-                        color: '#555',
-                        width: '60px',
-                        marginRight: '10px'
-                    }
-                },
-                elementConfig: {
-                    type: 'number',
-                    placeholder: 'Phone Number',
-                    readOnly: false
-                },
-                value: '',
-                validation: {
-                    required: true,
-                    length: 10
-                },
-                isValid: false,
-                isTouched: false
+        lapuNumber: {
+            elementConfig: {
+                type: 'number',
+                label: 'LAPU Number',
+                placeholder: 'LAPU Number',
+                required: true
             },
-            otp: {
-                elementType: 'input',
-                elementConfig: {
-                    type: 'number',
-                    placeholder: 'OTP',
-                    hidden: true,
-                    style: {
-                        textAlign: 'center'
-                    }
-                },
-                value: '',
-                validation: {
-                    required: true,
-                    length: 6
-                },
-                isValid: false,
-                isTouched: false,
-                isPhoneNumberPresent: false
-            }
+            inputProps: {
+                readOnly: false,
+                min: 1000000000,
+                max: 9999999999
+            },
+            value: '',
         },
-        isFormValid: false,
-        isLoading: false
-    }
-
-    checkValidity(value, rules) {
-        let isValid = true;
-
-        if (rules.required) {
-            isValid = value.trim(' ') !== '' && isValid;
-        }
-
-        if (rules.length) {
-            isValid = value.trim(' ').length === rules.length && isValid;
-        }
-
-        return isValid;
+        otp: {
+            elementConfig: {
+                type: 'number',
+                label: 'OTP',
+                placeholder: 'OTP',
+                required: true
+            },
+            inputProps: {
+                readOnly: false,
+                min: 100000,
+                max: 999999
+            },
+            value: '',
+        },
+        isTM: false,
+        isFirstUpdate: true
     }
 
     inputChangeHandler = (event, inputIdentifier) => {
-
-        const updatedForm = {
-            ...this.state.loginForm
-        };
-
-        const updatedFormElement = {
-            ...updatedForm[inputIdentifier]
-        };
-
-        updatedFormElement.value = event.target.value;
-
-        if (updatedFormElement.validation) {
-            updatedFormElement.isValid = this.checkValidity(updatedFormElement.value, updatedFormElement.validation);
-            updatedFormElement.isTouched = true;
-        }
-        updatedForm[inputIdentifier] = updatedFormElement;
-        // console.log(updatedFormElement);
-
-        let isFormValid = true;
-        for (let inputName in updatedForm) {
-            isFormValid = updatedForm[inputName].isValid && isFormValid;
-        }
-
-        console.log('isFormValid:', isFormValid);
+        const value = event.target.value;
+        this.setState(prevState => ({
+            [inputIdentifier]: {
+                ...prevState[inputIdentifier],
+                value
+            }
+        }));
+    }
 
 
+    fseOrTmSwitchHandler = (event) => {
+        const isTM = event.target.checked;
         this.setState({
-            loginForm: updatedForm,
-            isFormValid: isFormValid
+            isTM
         })
-
     }
 
-    submitOTPHandler = (event) => {
-        event.preventDefault();
-        const { confirmationResult } = this.state;
-        const otp = this.state.loginForm.otp.value;
-        confirmationResult.confirm(otp)
-            .then(user => {
-                const userDetails = {
-                    name: user.user.displayName,
-                    phoneNumber: user.user.phoneNumber
-                }
-                const isNewUser = user.additionalUserInfo.isNewUser;
-                console.log('[Login] isNewUser:', isNewUser);
-
-                this.props.updateUser(userDetails, isNewUser);
-                if (user && isNewUser) {
-                    this.props.history.replace('/create-profile');
-                } else {
-                    this.props.history.replace('/');
-                }
-            })
-            .catch(error => console.error(error));
-    }
-
-    submitPhoneNumberHandler = (event) => {
+    onLapuNumberSubmit = (event) => {
         event.preventDefault();
 
-        let phoneNumber = this.state.loginForm.phoneNumber.prefixElementConfig.value + this.state.loginForm.phoneNumber.value;
-        let appVerifier = window.recaptchaVerifier;
-        firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
-            .then(confirmationResult => {
-                this.setState(prevState => ({
-                    loginForm: {
-                        ...prevState.loginForm,
-                        phoneNumber: {
-                            ...prevState.loginForm.phoneNumber,
-                            elementConfig: {
-                                ...prevState.loginForm.phoneNumber.elementConfig,
-                                readOnly: true,
-                                style: {
-                                    backgroundColor: '#EEE',
-                                    color: '#555',
-                                }
-                            }
-                        },
-                        otp: {
-                            ...prevState.loginForm.otp,
-                            elementConfig: {
-                                ...prevState.loginForm.otp.elementConfig,
-                                hidden: false
-                            }
-                        }
-                    },
-                    confirmationResult,
-                    isPhoneNumberPresent: true,
-                }))
-            })
-            .catch(error => console.error(error));
-    }
-
-    onSignInSubmit = () => {
-        console.log('Inside onSignInSubmit');
-        console.log('----------------');
+        if (this.state.isTM) {
+            this.props.isTMValid(this.state.lapuNumber.value);
+        } else {
+            this.props.isFSEValid(this.state.lapuNumber.value);
+        }
     }
 
     componentDidMount() {
+        console.log('Loaded!!!!')
         window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sign-in-button', {
             'size': 'invisible',
             'callback': (response) => {
@@ -187,75 +84,181 @@ class Login extends React.Component {
         });
     }
 
+    componentDidUpdate() {
+        if ((this.props.isFseLapuNumberValid || this.props.isTmLapuNumberValid) && this.state.isFirstUpdate) {
+            console.log('inside component did update');
+            this.sendOtpToPhone();
+        }
+    }
+
+
+    componentWillUnmount() {
+        console.log(this.props)
+        console.log('componentWillUnmount')
+    }
+
+    
+    onSignInSubmit = () => {
+        console.log('Inside onSignInSubmit');
+        console.log('----------------');
+    }
+
+    sendOtpToPhone = () => {
+        let phoneNumber = '+91' + this.state.lapuNumber.value;
+        let appVerifier = window.recaptchaVerifier;
+        firebase.auth().signInWithPhoneNumber(phoneNumber, appVerifier)
+            .then(confirmationResult => {
+                this.setState({
+                    confirmationResult,
+                    isFirstUpdate: false
+                })
+            })
+            .catch(err => console.error(err));
+    }
+
+    submitOTPHandler = event => {
+        event.preventDefault();
+        const { confirmationResult } = this.state;
+        const otp = this.state.otp.value;
+        confirmationResult.confirm(otp)
+            .then(user => {
+                const userDetails = {
+                    lapuNumber: (user.user.phoneNumber).substr(3)
+                }
+
+                this.props.updateUser(userDetails);
+                this.props.history.replace('/');
+
+                //#region newUserCheck
+                // const isNewUser = user.additionalUserInfo.isNewUser;
+                // console.log('[Login] isNewUser:', isNewUser);
+                // if (user && isNewUser) {
+                //     this.props.history.replace('/create-profile');
+                // } else {
+                //     this.props.history.replace('/');
+                // }
+                //#endregion
+            })
+            .catch(error => console.error(error));
+    }
+
     render() {
-
-        if (this.props.isAuthenticated) {
-            return <Redirect to='/' />
+        if (this.props.user && this.props.user.lapuNumber) {
+            console.log('redirecting from inside if condition')
+            return (
+                <React.Fragment>
+                    <div id='sign-in-button'></div>
+                    <Redirect to="/" />
+                </React.Fragment>
+            )
         }
 
-        let formElementsArray = [];
-        for (let key in this.state.loginForm) {
-            formElementsArray.push({
-                id: key,
-                config: this.state.loginForm[key]
-            });
-        }
-        let submitFormButton = null;
-        if (!this.state.isPhoneNumberPresent) {
-            submitFormButton = <Button buttonType="Success" onClick={this.submitPhoneNumberHandler}>Send OTP</Button>;
+        const fseOrTmSwitch = (
+            <Typography component="div">
+                <Grid component="label" container alignItems="center" spacing={1}>
+                    <Grid item>FSE</Grid>
+                    <Grid item>
+                        <Switch
+                            checked={this.state.isTM}
+                            color="default"
+                            disabled={this.props.isFseLapuNumberValid || this.props.isTmLapuNumberValid}
+                            onChange={this.fseOrTmSwitchHandler}
+                        />
+                    </Grid>
+                    <Grid item>TM</Grid>
+                </Grid>
+            </Typography>
+        );
+
+        let lapuNumberForm = null;
+        let otpForm = null;
+        if (this.props.isFseLapuNumberValid || this.props.isTmLapuNumberValid) {
+            lapuNumberForm = (
+                <form onSubmit={this.onLapuNumberSubmit}>
+                    <TextField
+                        disabled
+                        {...this.state.lapuNumber.elementConfig}
+                        inputProps={this.state.lapuNumber.inputProps}
+                        value={this.state.lapuNumber.value}
+                        onChange={(event) => this.inputChangeHandler(event, 'lapuNumber')}
+                        variant="outlined"
+                        fullWidth
+                        margin="dense"
+                        style={{ margin: '10px 0' }}
+                    />
+                </form>
+            )
+
+            otpForm = (
+                <form onSubmit={this.submitOTPHandler}>
+                    <TextField
+                        {...this.state.otp.elementConfig}
+                        inputProps={this.state.otp.inputProps}
+                        value={this.state.otp.value}
+                        onChange={(event) => this.inputChangeHandler(event, 'otp')}
+                        variant="outlined"
+                        fullWidth
+                        margin="dense"
+                        style={{ margin: '10px 0' }}
+                    />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        type="submit"
+                    >
+                        Submit OTP
+                    </Button>
+                </form>
+            )
         } else {
-            submitFormButton = <Button buttonType="Success" onClick={this.submitOTPHandler}>Submit OTP</Button>;
-        }
-
-
-        let form = <Spinner />;
-        if (!this.state.isLoading) {
-            form = (
-                <form>
-                    {
-                        formElementsArray.map(formElement => {
-                            if (!formElement.config.elementConfig.hidden) {
-                                return (
-                                    <Input
-                                        key={formElement.id}
-                                        elementType={formElement.config.elementType}
-                                        elementConfig={formElement.config.elementConfig}
-                                        prefixElementConfig={formElement.config.prefixElementConfig}
-                                        value={formElement.config.value}
-                                        onChange={(event) => this.inputChangeHandler(event, formElement.id)}
-                                        isValidationRequired={formElement.config.validation}
-                                        valid={formElement.config.isValid}
-                                        touched={formElement.config.isTouched}
-                                    />
-                                )
-                            } else {
-                                return null;
-                            }
-                        })
-                    }
-                    {submitFormButton}
-                </form>);
+            lapuNumberForm = (
+                <form onSubmit={this.onLapuNumberSubmit}>
+                    <TextField
+                        {...this.state.lapuNumber.elementConfig}
+                        inputProps={this.state.lapuNumber.inputProps}
+                        value={this.state.lapuNumber.value}
+                        onChange={(event) => this.inputChangeHandler(event, 'lapuNumber')}
+                        variant="outlined"
+                        fullWidth
+                        margin="dense"
+                        style={{ margin: '10px 0' }}
+                    />
+                    <Button
+                        variant="contained"
+                        color="primary"
+                        fullWidth
+                        type="submit"
+                    >
+                        Get OTP
+                    </Button>
+                </form>
+            )
         }
 
         return (
-            <div>
+            <React.Fragment>
                 <div id='sign-in-button'></div>
-                {form}
-            </div>
+                {fseOrTmSwitch}
+                {lapuNumberForm}
+                {otpForm}
+                <Error text={this.props.error} />
+            </React.Fragment>
         )
     }
 }
 
-const mapStateToProps = state => {
-    return {
-        isAuthenticated: state.isAuthenticated
-    }
-}
+const mapStateToProps = state => ({
+    user: state.user.user,
+    error: state.user.error,
+    isFseLapuNumberValid: state.user.user ? (state.user.user.managerLapuNumber ? true : false) : false,
+    isTmLapuNumberValid: state.user.isTmLapuNumberValid
+});
 
-const mapDispatchToProps = dispatch => {
-    return {
-        updateUser: userDetails => dispatch({ type: UPDATE_USER, user: userDetails })
-    }
-}
+const mapDispatchToProps = dispatch => ({
+    isFSEValid: lapuNumber => dispatch(checkFSEinFirestore(lapuNumber)),
+    isTMValid: lapuNumber => dispatch(checkTMinFirestore(lapuNumber)),
+    updateUser: userDetails => dispatch({ type: UPDATE_USER, user: userDetails })
+})
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);

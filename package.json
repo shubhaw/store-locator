@@ -7,6 +7,8 @@
     "npm": "6.9.0"
   },
   "dependencies": {
+    "@material-ui/core": "^4.5.0",
+    "@material-ui/icons": "^4.4.3",
     "axios": "^0.19.0",
     "firebase": "^7.0.0",
     "react": "^16.10.0",
