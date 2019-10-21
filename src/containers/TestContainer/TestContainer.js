@@ -26,7 +26,7 @@ class TestContainer extends React.Component {
 }
 
 const mapStateToProps = state => ({
-    isSnackbarVisible: state.isSnackbarVisible
+    isSnackbarVisible: state.user.isSnackbarVisible
 });
 
 const mapDispatchToProps = dispatch => ({

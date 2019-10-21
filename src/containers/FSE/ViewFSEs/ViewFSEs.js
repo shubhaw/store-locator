@@ -39,8 +39,8 @@ class ViewFSEs extends React.Component {
 
 const mapStateToProps = state => {
     return {
-        fseList: state.fseList,
-        userId: state.user.phoneNumber
+        fseList: state.user.fseList,
+        userId: state.user.user? state.user.user.lapuNumber: null
     }
 }
 

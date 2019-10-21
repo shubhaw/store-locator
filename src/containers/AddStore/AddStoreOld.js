@@ -4,11 +4,9 @@ import { addStoreToFirestore } from '../../store/actions/actions';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import styleClasses from './AddStore.module.css';
+import Map from '../../components/Map/Map';
 import Spinner from '../../components/UI/Spinner/Spinner';
-import { MAKE_SNACKBAR_INVISIBLE, RESET_STATE } from '../../store/actions/actionTypes';
-import Snackbar from '../../components/UI/Snackbar/Snackbar';
-import Error from '../../components/UI/Error/Error';
-import { Typography } from '@material-ui/core';
+// import axios from '../../axios';
 
 class AddStore extends React.Component {
     state = {
@@ -160,7 +158,8 @@ class AddStore extends React.Component {
         },
         location: null,
         isMapVisible: false,
-        isFormValid: false
+        isFormValid: false,
+        isLoading: false
     }
 
     checkValidity(value, rules) {
@@ -192,16 +191,39 @@ class AddStore extends React.Component {
     addStoreHandler = (event) => {
         event.preventDefault();
 
+        this.setState({
+            isLoading: true,
+            isError: false,
+            errorMessage: ''
+        });
+
         let storeDetails = {};
         for (let formElementName in this.state.storeForm) {
-            storeDetails[formElementName] = Number(this.state.storeForm[formElementName].value);
+            storeDetails[formElementName] = this.state.storeForm[formElementName].value;
         }
 
         storeDetails.location = this.state.location;
-        storeDetails.addedAt = new Date();
-        storeDetails.managerLapuNumber = Number(localStorage.getItem('managerLapuNumber'));
+        storeDetails.addedBy = this.props.userId;
+        storeDetails.managerId = 'Raman Singh';
+        //add manager name to store while logging in
 
         this.props.addStoreInDb(storeDetails, this.props.userId);
+
+        //#region axios
+        // axios.post('/store', storeDetails)
+        //     .then(res => {
+        //         alert('Details submitted successfully.\nThanks:)');
+        //         console.log(res);
+        //         this.props.history.push('/home');
+        //     })
+        //     .catch(err => {
+        //         alert('Something went wrong. Please try again later!');
+        //         this.setState({
+        //             isLoading: false,
+        //         });
+        //         console.error(err);
+        //     });
+        //#endregion
     }
 
     inputChangeHandler = (event, inputIdentifier) => {
@@ -215,9 +237,10 @@ class AddStore extends React.Component {
         };
 
         updatedFormElement.value = event.target.value;
-        updatedFormElement.isTouched = true;
+
         if (updatedFormElement.validation) {
             updatedFormElement.isValid = this.checkValidity(updatedFormElement.value, updatedFormElement.validation);
+            updatedFormElement.isTouched = true;
         }
         updatedForm[inputIdentifier] = updatedFormElement;
         // console.log(updatedFormElement);
@@ -227,6 +250,8 @@ class AddStore extends React.Component {
             isFormValid = updatedForm[inputName].isValid && isFormValid;
         }
 
+        console.log('isFormValid:', isFormValid);
+
 
         this.setState({
             storeForm: updatedForm,
@@ -235,16 +260,16 @@ class AddStore extends React.Component {
 
     }
 
-    fetchCurrentLocation = () => {
+    fetchCurrentLocation = (event) => {
         if (navigator.geolocation) {
             let options = {};
-            navigator.geolocation.getCurrentPosition(this.setLocation, this.locationErrorHandler, options);
+            navigator.geolocation.getCurrentPosition(this.setLocation, this.errorHandler, options);
         } else {
-            alert('Location feature is not available on this browser!!!\nPlease use a different browser.');
+            alert('Location feature is not available on this browser!!!\nPlease use some other browser.');
         }
     }
 
-    locationErrorHandler = err => {
+    errorHandler = err => {
         if (err.code === 1) {
             alert("Error: Access is denied!\nPlease allow the browser to access the location.");
         } else if (err.code === 2) {
@@ -256,14 +281,14 @@ class AddStore extends React.Component {
         console.log('Latitude: ', position.coords.latitude, 'Longitude:', position.coords.longitude);
         this.setState({
             location: {
-                lat: Number((position.coords.latitude).toFixed(6)),
-                lng: Number((position.coords.longitude).toFixed(6))
+                lat: position.coords.latitude,
+                lng: position.coords.longitude
             }
         });
     }
 
     componentDidMount() {
-        const FOSBeatValue = this.props.userId ? this.props.userId : null;
+        const FOSBeatValue = this.props.userId.substr(3);
         this.setState(prevState => ({
             ...prevState,
             storeForm: {
@@ -276,31 +301,26 @@ class AddStore extends React.Component {
         }));
 
         this.fetchCurrentLocation();
-    }
-
-    componentDidUpdate() {
-        // to reset the form
-        if (this.props.isSuccessful) {
-            console.log('Coming inside')
-            let form = this.state.storeForm;
-            for (let formElement in form) {
-                if (formElement !== 'FOSBeat') {
-                    form[formElement].value = '';
-                }
-            }
-
-            this.props.resetStateVariables();
-
-            this.setState(prevState => ({
-                ...prevState,
-                storeForm: {
-                    ...form
-                }
-            }));
+        
+        if(this.props.userId) {
+            console.log('userId:', this.props.userId)
+            //this.props.fetchMember(9999999999);
         }
     }
 
+    toggleMap = (event) => {
+        event.preventDefault();
+        this.setState(prevState => ({ isMapVisible: !prevState.isMapVisible }));
+    }
+
     render() {
+        let map = null;
+        let mapButtonText = 'Show Location on Map';
+        if (this.state.isMapVisible) {
+            map = <Map currentLocation={this.state.location} />
+            mapButtonText = 'Hide Map';
+        }
+
         let formElementsArray = [];
         for (let key in this.state.storeForm) {
             formElementsArray.push({
@@ -309,51 +329,74 @@ class AddStore extends React.Component {
             });
         }
 
+        let submitFormButton = <Button buttonType="Success" onClick={this.addStoreHandler}>Submit</Button>;
+        if (!this.state.isFormValid) {
+            submitFormButton = <Button buttonType="Success" disabled onClick={this.addStoreHandler}>Submit</Button>;
+        }
         let form = <Spinner />;
 
-        if (!this.props.isLoading) {
+        if (!this.state.isLoading) {
             form = (
                 <form onSubmit={this.addStoreHandler}>
                     {
-                        formElementsArray.map((formElement, index) => {
-
-                            const isError = formElement.config.isTouched ? !formElement.config.isValid : false;
-                            return (
-                                <TextField
-                                    error={isError}
+                        formElementsArray.map((formElement, index) => (
+                            <TextField
+                                    error={formElement.config.isTouched || !(formElement.config.isTouched && formElement.config.isValid)}
                                     key={index}
                                     {...formElement.config.elementConfig}
                                     variant="outlined"
                                     margin="dense"
-                                    style={{ margin: '10px 0' }}
+                                    style={{margin: '10px 0'}}
                                     fullWidth
                                     inputProps={formElement.config.inputProps}
                                     value={formElement.config.value}
                                     onChange={(event) => this.inputChangeHandler(event, formElement.id)}
                                 />
-                            )
-                        })
+                        ))
                     }
-                    <Button variant="contained" color="primary" fullWidth type="submit" style={{ margin: '10px 0' }}>
-                        Add
+                    <Button variant="contained" color="primary" fullWidth type="submit" style={{margin: '15px 0'}}>
+                        Submit
                     </Button>
                 </form>
             )
+            
+            //#region old form
+            // form = (
+            //     <form className={styleClasses.formWrapper}
+            //     // onSubmit={this.addStoreHandler}
+            //     >
+            //         <div className={styleClasses.form}>
+            //             {
+            //                 formElementsArray.map(formElement => (
+            //                     <Input
+            //                         key={formElement.id}
+            //                         elementType={formElement.config.elementType}
+            //                         elementConfig={formElement.config.elementConfig}
+            //                         value={formElement.config.value}
+            //                         onChange={(event) => this.inputChangeHandler(event, formElement.id)}
+            //                         isValidationRequired={formElement.config.validation}
+            //                         valid={formElement.config.isValid}
+            //                         touched={formElement.config.isTouched}
+            //                     />
+            //                 ))
+            //             }
+            //         </div>
+            //         <div className={styleClasses.map}>
+            //             {map}
+            //             <Button buttonType="Map" onClick={this.toggleMap}>
+            //                 {mapButtonText}
+            //             </Button>
+            //             {submitFormButton}
+            //         </div>
+
+            //     </form>);
+            //#endregion
         }
 
         return (
             <div className={styleClasses.AddStore}>
-                <Typography variant="h5">
-                    Add Retailer
-                </Typography>
-                <Error text={this.props.error} />
+                <h1>Add Store</h1>
                 {form}
-                <Snackbar
-                    show={this.props.isSnackbarVisible}
-                    message='Response submitted successfully!'
-                    autoHideDuration={2000}
-                    onSnackbarClose={this.props.snackbarCloseHandler}
-                />
             </div>
         )
     }
@@ -361,19 +404,16 @@ class AddStore extends React.Component {
 
 const mapStateToProps = state => {
     return {
-        userId: state.user.user ? state.user.user.lapuNumber : null,
+        userId: state.user.user? state.user.user.lapuNumber: null,
         isLoading: state.user.isLoading,
         isSuccessful: state.user.isSuccessful,
-        error: state.user.error,
-        isSnackbarVisible: state.user.isSnackbarVisible
+        error: state.user.error
     }
 }
 
 const mapDispatchToProps = dispatch => {
     return {
-        addStoreInDb: (storeDetails, fseId) => dispatch(addStoreToFirestore(storeDetails, fseId)),
-        snackbarCloseHandler: () => dispatch({ type: MAKE_SNACKBAR_INVISIBLE }),
-        resetStateVariables: () => dispatch({ type: RESET_STATE })
+        addStoreInDb: (storeDetails, fseId) => dispatch(addStoreToFirestore(storeDetails, fseId))
     }
 }
 

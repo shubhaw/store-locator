@@ -8,16 +8,19 @@ import {
     SET_FSE_LIST,
     ADD_STORE_SUCCESS,
     ADD_STORE_FAILURE,
-    UPDATE_MANAGER_ID,
+    UPDATE_MANAGER_LAPU_NUMBER,
     MAKE_SNACKBAR_VISIBLE,
     MAKE_SNACKBAR_INVISIBLE,
     SET_ERROR,
-    CLEAR_ERROR
+    CLEAR_ERROR,
+    LOGOUT,
+    SET_IS_FSE
 } from '../actions/actionTypes';
 
 const initialState = {
     user: null,
     isAuthenticated: false,
+    isTmLapuNumberValid: false,
     isNewUser: false,
     error: null,
     isSuccessful: false,
@@ -25,7 +28,7 @@ const initialState = {
     isSnackbarVisible: false
 }
 
-export const reducer = (state = initialState, action) => {
+const userReducer = (state = initialState, action) => {
     switch (action.type) {
         case UPDATE_USER:
             if (action.user) {
@@ -70,8 +73,7 @@ export const reducer = (state = initialState, action) => {
                 ...state,
                 isSuccessful: false,
                 error: null,
-                isLoading: false,
-                isSnackbarVisible: false
+                isLoading: false
             }
         case SET_FSE_LIST:
             return {
@@ -81,7 +83,9 @@ export const reducer = (state = initialState, action) => {
         case ADD_STORE_SUCCESS:
             return {
                 ...state,
-                isSuccessful: true
+                isSuccessful: true,
+                isLoading: false,
+                isSnackbarVisible: true
             }
         case ADD_STORE_FAILURE:
             return {
@@ -89,12 +93,13 @@ export const reducer = (state = initialState, action) => {
                 error: action.error,
                 isLoading: false
             }
-        case UPDATE_MANAGER_ID:
+        case UPDATE_MANAGER_LAPU_NUMBER:
+            localStorage.setItem('managerLapuNumber', action.managerLapuNumber);
             return {
                 ...state,
                 user: {
                     ...state.user,
-                    managerId: action.managerId
+                    managerLapuNumber: action.managerLapuNumber
                 }
             }
         case MAKE_SNACKBAR_VISIBLE:
@@ -117,7 +122,24 @@ export const reducer = (state = initialState, action) => {
                 ...state,
                 error: null
             }
+        case SET_IS_FSE:
+            localStorage.setItem('isFSE', action.value);
+            return {
+                ...state,
+                isTmLapuNumberValid: action.value === 'false' ? true : false
+            };
+        case LOGOUT:
+            localStorage.removeItem('managerLapuNumber');
+            localStorage.removeItem('isFSE');
+            return {
+                ...state,
+                user: null,
+                isTmLapuNumberValid: false,
+                isAuthenticated: false
+            }
         default:
             return state;
     }
 }
+
+export default userReducer;

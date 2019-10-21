@@ -150,7 +150,7 @@ class CreateProfile extends React.Component {
                 ...prevState.profileForm,
                 phoneNumber: {
                     ...prevState.profileForm.phoneNumber,
-                    value: this.props.user.phoneNumber
+                    value: this.props.user.lapuNumber
                 }
             }
         }));
@@ -207,8 +207,8 @@ class CreateProfile extends React.Component {
 
 const mapStateToProps = state => {
     return {
-        user: state.user,
-        isNewUser: state.isNewUser
+        user: state.user.user,
+        isNewUser: state.user.isNewUser
     }
 }
 

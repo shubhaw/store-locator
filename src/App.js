@@ -5,43 +5,80 @@ import { UPDATE_USER, RESET_STATE } from './store/actions/actionTypes';
 import './App.css';
 import Layout from './containers/Layout/Layout';
 import AddStore from './containers/AddStore/AddStore';
+import AddStoreOld from './containers/AddStore/AddStoreOld';
 import Stores from './containers/Stores/Stores';
 import PrivateRoute from './components/PrivateRoute/PrivateRoute';
-import Login from './containers/Login/Login';
+import LoginOld from './containers/Login/LoginOld';
 import CreateProfile from './containers/CreateProfile/CreateProfile';
 import firebaseApp from './config/Firebase/firebase';
 import AddFSE from './containers/FSE/AddFSE/AddFSE';
 import ViewFSEs from './containers/FSE/ViewFSEs/ViewFSEs';
 import TestContainer from './containers/TestContainer/TestContainer';
-import LoginNew from './containers/Login/LoginNew';
+import Login from './containers/Login/Login';
+import ViewRetailers from './containers/Retailers/ViewRetailers/ViewRetailers';
+import Logout from './containers/Logout/Logout';
 
 class App extends React.Component {
 
     componentDidMount() {
         this.props.resetState();
         firebaseApp.auth().onAuthStateChanged(user => {
-            this.props.updateUser({
-                name: user.displayName,
-                phoneNumber: user.phoneNumber
-            });
+            if(user) {
+                this.props.updateUser({
+                    lapuNumber: (user.phoneNumber).substr(3),
+                    managerLapuNumber: localStorage.getItem('managerLapuNumber')
+                });
+            }
         });
     }
 
     render() {
         // console.log('isAuthenticated', this.props.isAuthenticated, this.props.user);
+        const loggedOutRoutes = (
+            <React.Fragment>
+                <Route path="/login" exact component={Login} />
+                <Redirect to="/login" />
+            </React.Fragment>
+        )
+        const fseRoutes = (
+            <React.Fragment>
+                <PrivateRoute path="/" exact component={AddStore} />
+                <Route path='/view-retailers' exact component={ViewRetailers} />
+                <Route path="/login" exact component={Login} />
+                <PrivateRoute path='/logout' exact component={Logout} />
+                <Redirect to="/" />
+            </React.Fragment>
+        )
+        const tmRoutes = (
+            <React.Fragment>
+                <PrivateRoute path='/add-fse' exact component={AddFSE} />
+                <Route path='/add-store-old' exact component={AddStoreOld} />
+                <Route path='/view-retailers' exact component={ViewRetailers} />
+                <PrivateRoute path="/download-all" component={Stores} />
+                <PrivateRoute path="/" exact component={AddStore} />
+                <Route path="/login-old" exact component={LoginOld} />
+                <Route path="/login" exact component={Login} />
+                <PrivateRoute path="/create-profile" exact component={CreateProfile} />
+                <PrivateRoute path='/view-fses' exact component={ViewFSEs} />
+                <PrivateRoute path='/logout' exact component={Logout} />
+                <Route path='/test' exact component={TestContainer} />
+                <Redirect to="/" />
+            </React.Fragment>
+        )
+
+        let routes = loggedOutRoutes;
+
+        if(this.props.isAuthenticated && localStorage.getItem('isFSE') && localStorage.getItem('isFSE') === 'true') {
+            routes = fseRoutes;
+        } else if(this.props.isAuthenticated && localStorage.getItem('isFSE') && localStorage.getItem('isFSE') === 'false') {
+            routes = tmRoutes;
+        }
+
         return (
             <BrowserRouter>
                 <Layout>
                     <Switch>
-                        <Route path='/add-fse' exact component={AddFSE} />
-                        <PrivateRoute path="/download-all" component={Stores} />
-                        <Route path="/" exact component={AddStore} />
-                        <Route path="/login" exact component={Login} />
-                        <Route path="/login-new" exact component={LoginNew} />
-                        <PrivateRoute path="/create-profile" exact component={CreateProfile} />
-                        <PrivateRoute path='/view-fses' exact component={ViewFSEs} />
-                        <Route path='/test' exact component={TestContainer} />
-                        <Redirect to="/" />
+                        {routes}
                     </Switch>
                 </Layout>
             </BrowserRouter>
@@ -52,8 +89,8 @@ class App extends React.Component {
 const mapStateToProps = state => {
     return {
         user: state.user,
-        isAuthenticated: state.isAuthenticated,
-        isNewUser: state.isNewUser
+        isAuthenticated: state.user ? state.user.isAuthenticated : false,
+        isNewUser: state.user.isNewUser
     }
 }
 

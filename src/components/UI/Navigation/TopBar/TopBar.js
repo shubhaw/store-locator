@@ -22,7 +22,7 @@ const TopBar = props => {
                     >
                         <MenuIcon />
                     </IconButton>
-                    <Typography variant="h6" noWrap>{props.pageTitle}</Typography>
+                    <Typography variant="h6" noWrap>Store Locator</Typography>
                 </Toolbar>
             </AppBar>
         </div>

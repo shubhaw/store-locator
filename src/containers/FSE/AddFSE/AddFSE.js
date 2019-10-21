@@ -147,10 +147,10 @@ class AddFSE extends React.Component {
 
 const mapStateToProps = state => {
     return {
-        userId: state.user ? state.user.phoneNumber : null,
-        isSuccessful: state.isSuccessful,
-        error: state.error,
-        isLoading: state.isLoading
+        userId: state.user.user ? state.user.user.lapuNumber : null,
+        isSuccessful: state.user.isSuccessful,
+        error: state.user.error,
+        isLoading: state.user.isLoading
     }
 }
 
