@@ -11,10 +11,12 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Toolbar from '@material-ui/core/Toolbar';
 import AppBar from '@material-ui/core/AppBar';
 
-import HomeIcon from '@material-ui/icons/Home';
+
+import { connect } from 'react-redux';
+import { logoutFromFirestore } from '../../../../store/actions/actions';
+
 import AddLocationIcon from '@material-ui/icons/AddLocation';
 import GetAppIcon from '@material-ui/icons/GetApp';
-import NoteAddIcon from '@material-ui/icons/NoteAdd';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
@@ -38,44 +40,37 @@ const Sidebar = props => {
         },
         {
             to: '/view-retailers',
-            text: 'View Retailers',
+            text: 'View Entries',
             icon: <ViewHeadlineIcon />
-        },
-        {
-            to: '/logout',
-            text: 'Logout',
-            icon: <ExitToAppIcon />
         }
     ];
+
+    // const fseLinks = [
+    //     {
+    //         to: {
+    //             pathname: '/',
+    //             state: {
+    //                 from: window.location.pathname
+    //             }
+    //         },
+    //         text: 'Add Store',
+    //         icon: <AddLocationIcon />
+    //     },
+    //     {
+    //         to: {
+    //             pathname: '/view-retailers',
+    //             state: {
+    //                 from: window.location.pathname
+    //             }
+    //         },
+    //         text: 'View Entries',
+    //         icon: <ViewHeadlineIcon />
+    //     }
+    // ];
 
     const tmLinks = [
         {
             to: '/',
-            text: 'Add Store',
-            icon: <AddLocationIcon />
-        },
-        {
-            to: '/add-store-old',
-            text: 'Add Store Old',
-            icon: <HomeIcon />
-        },
-        {
-            to: '/view-retailers',
-            text: 'View Retailers',
-            icon: <ViewHeadlineIcon />
-        },
-        {
-            to: '/download-all',
-            text: 'Download All',
-            icon: <GetAppIcon />
-        },
-        {
-            to: '/create-profile',
-            text: 'Create Profile',
-            icon: <NoteAddIcon />
-        },
-        {
-            to: '/add-fse',
             text: 'Add FSE',
             icon: <PersonAddIcon />
         },
@@ -85,28 +80,37 @@ const Sidebar = props => {
             icon: <GroupIcon />
         },
         {
-            to: '/logout',
-            text: 'Logout',
-            icon: <ExitToAppIcon />
+            to: '/view-retailers',
+            text: 'View Entries',
+            icon: <ViewHeadlineIcon />
         }
     ];
 
     let links = [...loggedOutLinks];
+    let logOutLink = null;
 
-    if(!localStorage.getItem('isFSE')) {
-        links = [...loggedOutLinks];
-    } else if(localStorage.getItem('isFSE') === 'true') {
-        links = [...fseLinks];
-    } else {
-        links = [...tmLinks];
+    
+    if (props.isAuthenticated) {
+        if (localStorage.getItem('isFSE') === 'true') {
+            links = [...fseLinks];
+        } else if (localStorage.getItem('isFSE') === 'false') {
+            links = [...tmLinks];
+        }
+
+        logOutLink = (
+            <ListItem button onClick={props.logoutFromDb}>
+                <ListItemIcon><ExitToAppIcon /></ListItemIcon>
+                <ListItemText primary="Logout" onClick={props.drawerCloseHandler} />
+            </ListItem>
+        )
     }
 
     let headerBar = (
         <AppBar position='relative' className={styleClasses.appBar}>
-                <Toolbar>
-                    <Typography variant="h6" noWrap>Store Locator</Typography>
-                </Toolbar>
-            </AppBar>
+            <Toolbar>
+                <Typography variant="h6" noWrap>Store Locator</Typography>
+            </Toolbar>
+        </AppBar>
     )
     const sideList = () => {
         return (
@@ -123,6 +127,7 @@ const Sidebar = props => {
                             <ListItemText primary={link.text} />
                         </ListItem>
                     ))}
+                    {logOutLink}
                 </List>
             </div>
         );
@@ -135,4 +140,12 @@ const Sidebar = props => {
     )
 }
 
-export default Sidebar;
+const mapStateToProps = state => ({
+    isAuthenticated: state.user.isAuthenticated
+})
+
+const mapDispatchToProps = dispatch => ({
+    logoutFromDb: () => dispatch(logoutFromFirestore())
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(Sidebar);

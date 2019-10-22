@@ -71,13 +71,12 @@ class Login extends React.Component {
     }
 
     componentDidMount() {
-        console.log('Loaded!!!!')
         window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sign-in-button', {
             'size': 'invisible',
             'callback': (response) => {
-                console.log('reCAPTCHA solved!');
-                console.log(response);
-                console.log('----------------');
+                // console.log('reCAPTCHA solved!');
+                // console.log(response);
+                // console.log('----------------');
                 // reCAPTCHA solved, allow signInWithPhoneNumber.
                 this.onSignInSubmit();
             }
@@ -86,18 +85,11 @@ class Login extends React.Component {
 
     componentDidUpdate() {
         if ((this.props.isFseLapuNumberValid || this.props.isTmLapuNumberValid) && this.state.isFirstUpdate) {
-            console.log('inside component did update');
+            console.log('[Login.js]inside component did update');
             this.sendOtpToPhone();
         }
     }
 
-
-    componentWillUnmount() {
-        console.log(this.props)
-        console.log('componentWillUnmount')
-    }
-
-    
     onSignInSubmit = () => {
         console.log('Inside onSignInSubmit');
         console.log('----------------');
@@ -143,12 +135,16 @@ class Login extends React.Component {
     }
 
     render() {
-        if (this.props.user && this.props.user.lapuNumber) {
-            console.log('redirecting from inside if condition')
+        if (this.props.isAuthenticated) {
+            
+            // if (this.props.user && this.props.user.lapuNumber) {
+            //     console.log('redirecting from inside if condition')
+            const from = localStorage.getItem('lastLocation') || { pathname: '/'}
+            console.log('[Login.js] location:', from);
             return (
                 <React.Fragment>
                     <div id='sign-in-button'></div>
-                    <Redirect to="/" />
+                    <Redirect to={from} />
                 </React.Fragment>
             )
         }
@@ -250,6 +246,7 @@ class Login extends React.Component {
 
 const mapStateToProps = state => ({
     user: state.user.user,
+    isAuthenticated: state.user.isAuthenticated,
     error: state.user.error,
     isFseLapuNumberValid: state.user.user ? (state.user.user.managerLapuNumber ? true : false) : false,
     isTmLapuNumberValid: state.user.isTmLapuNumberValid

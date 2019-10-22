@@ -1,13 +1,13 @@
 import React from 'react';
 import { connect } from 'react-redux';
-import { addStoreToFirestore } from '../../store/actions/actions';
+import { addStoreToFirestore } from '../../../store/actions/actions';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import styleClasses from './AddStore.module.css';
-import Spinner from '../../components/UI/Spinner/Spinner';
-import { MAKE_SNACKBAR_INVISIBLE, RESET_STATE } from '../../store/actions/actionTypes';
-import Snackbar from '../../components/UI/Snackbar/Snackbar';
-import Error from '../../components/UI/Error/Error';
+import Spinner from '../../../components/UI/Spinner/Spinner';
+import { MAKE_SNACKBAR_INVISIBLE, RESET_STATE } from '../../../store/actions/actionTypes';
+import Snackbar from '../../../components/UI/Snackbar/Snackbar';
+import Error from '../../../components/UI/Error/Error';
 import { Typography } from '@material-ui/core';
 
 class AddStore extends React.Component {
@@ -263,6 +263,7 @@ class AddStore extends React.Component {
     }
 
     componentDidMount() {
+        localStorage.setItem('lastLocation', '/');
         const FOSBeatValue = this.props.userId ? this.props.userId : null;
         this.setState(prevState => ({
             ...prevState,
@@ -279,6 +280,7 @@ class AddStore extends React.Component {
     }
 
     componentDidUpdate() {
+        console.log('[AddStore.js] componentDidMount(). location', this.props.location)
         // to reset the form
         if (this.props.isSuccessful) {
             console.log('Coming inside')

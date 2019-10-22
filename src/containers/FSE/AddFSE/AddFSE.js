@@ -135,6 +135,7 @@ class AddFSE extends React.Component {
             )
         }
 
+        console.log(this.props)
         return (
             <React.Fragment>
                 {form}

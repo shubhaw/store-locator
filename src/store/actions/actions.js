@@ -10,9 +10,9 @@ import {
     SET_ERROR,
     CLEAR_ERROR,
     LOGOUT,
-    SET_IS_FSE,
-    UPDATE_RETAILER_LIST
+    SET_IS_FSE
 } from './actionTypes';
+
 import firebase from 'firebase/app';
 import 'firebase/firestore';
 import firebaseApp from '../../config/Firebase/firebase';
@@ -233,42 +233,4 @@ const logout = () => ({
     type: LOGOUT
 })
 
-export const fetchRetailerDetailsFromFirestore = fseLapuNumber => {
-    return dispatch => {
-        const currentDate = new Date()
-        const firstDayOfCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
-        const lastDayOfCurrentMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
-        const db = firebase.firestore();
-        const retailerList = [];
-        let retailerListQuery = db.collection(FSE_COLLECTION).doc(fseLapuNumber).collection(ENTRIES_SUB_COLLECTION)
-            .orderBy('addedAt', 'desc')
-            .where('addedAt', '>=', firstDayOfCurrentMonth)
-            .where('addedAt', '<=', lastDayOfCurrentMonth)
-            // .limit(1);
-        retailerListQuery.get()
-            .then(docSnapshots => {
-                console.log('[fetchRetailerDetailsFromFirestore] docSnapshots', docSnapshots)
-                docSnapshots.forEach(docSnapshot => {
-                    if(docSnapshot.exists) {
-                        console.log('[fetchRetailerDetailsFromFirestore] docSnapshot', docSnapshot.data())
-                        retailerList.push(docSnapshot.data())
-                    }
-                })
-                return dispatch(fetchRetailerDetails(retailerList));
-            })
-            .catch(err => dispatch(setError(err)));
-        // retailerListQuery.get().then(docSnapshots => {
-        //     let lastVisible = docSnapshots.docs[docSnapshots.docs.length-1];
-        //     console.log('last:', lastVisible);
-        //     let next = db.collection(FSE_COLLECTION).doc(fseLapuNumber).collection(ENTRIES_SUB_COLLECTION)
-        //         .orderBy('addedAt')
-        //         .startAfter(lastVisible)
-        //         .limit(2);
-        // })
-    }
-}
 
-const fetchRetailerDetails = (retailerList) => ({
-    type: UPDATE_RETAILER_LIST,
-    retailerList
-})
