@@ -1,7 +1,7 @@
 import React from 'react';
 import { connect } from 'react-redux';
 import { loadFseList } from '../../../store/actions/actions';
-import { List, ListItem, ListItemText, Paper, Divider, Typography } from '@material-ui/core';
+import { List, ListItem, ListItemText, Paper, Typography } from '@material-ui/core';
 
 
 class ViewFSEs extends React.Component {
@@ -10,28 +10,35 @@ class ViewFSEs extends React.Component {
         this.props.loadFseList(this.props.userId);
     }
 
+    fseClickHandler = fseLapuNumber => {
+        console.log('[fseClickHandler] fseLapuNumber: ', fseLapuNumber);
+        this.props.history.push({
+            pathname: '/view-retailers',
+            search: '?fseLapuNumber=' + fseLapuNumber
+        })
+    }
+
     render() {
         if (!this.props.fseList) {
             return <div>No Records</div>
         }
         var list = this.props.fseList.map(fse => {
             return (
-                <ListItem button key={fse}>
+                <ListItem button key={fse} onClick={() => this.fseClickHandler(fse)}>
                     <ListItemText primary={fse} />
                 </ListItem>
             )
         });
 
         return (
-            <Paper>
-                <List>
-                    <ListItem>
-                        <Typography variant='h5'>FSEs under you</Typography>
-                    </ListItem>
-                    <Divider />
-                    {list}
-                </List>
-            </Paper>
+            <React.Fragment>
+                <Typography variant='h5'>FSEs under you</Typography>
+                <Paper>
+                    <List>
+                        {list}
+                    </List>
+                </Paper>
+            </React.Fragment>
         )
     }
 }
@@ -40,7 +47,7 @@ class ViewFSEs extends React.Component {
 const mapStateToProps = state => {
     return {
         fseList: state.user.fseList,
-        userId: state.user.user? state.user.user.lapuNumber: null
+        userId: state.user.user ? state.user.user.lapuNumber : null
     }
 }
 

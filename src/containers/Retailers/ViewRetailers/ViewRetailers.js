@@ -1,60 +1,27 @@
 import React from 'react';
 import { connect } from 'react-redux';
+import ReactExport from 'react-export-excel';
 import Spinner from '../../../components/UI/Spinner/Spinner';
-import { Typography, Drawer, Fab, Divider, Button, Chip } from '@material-ui/core';
+import { Typography, Drawer, Fab, Divider, Button, Chip, Grid, Avatar } from '@material-ui/core';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import styleClasses from './ViewRetailers.module.css';
-import { fetchRetailerDetailsFromFirestore } from '../../../store/actions/actions';
-import { SET_IS_FSE } from '../../../store/actions/actionTypes';
+import { fetchRetailerDetailsForFseFromFirestore, fetchRetailerDetailsForTmFromFirestore } from '../../../store/actions/retailerActions';
 import Retailer from '../../../components/Retailer/Retailer';
+import { RESET_RETAILER } from '../../../store/actions/actionTypes';
+import GetAppIcon from '@material-ui/icons/GetApp';
+
+const ExcelFile = ReactExport.ExcelFile;
+const ExcelSheet = ReactExport.ExcelFile.ExcelSheet;
+const ExcelColumn = ReactExport.ExcelFile.ExcelColumn;
 
 class ViewRetailers extends React.Component {
 
     state = {
-        retailerList: [
-            {
-                lapuNumber: 2314569780,
-                isSelected: true
-            },
-            {
-                lapuNumber: 9784561230,
-                isSelected: true
-            },
-            {
-                lapuNumber: 4569782310,
-                isSelected: true
-            }
-        ],
-        fseList: [
-            {
-                lapuNumber: 2314569785,
-                isSelected: true
-            },
-            {
-                lapuNumber: 4569782135,
-                isSelected: true
-            },
-            {
-                lapuNumber: 9784562315,
-                isSelected: true
-            },
-            {
-                lapuNumber: 7984561325,
-                isSelected: true
-            },
-            {
-                lapuNumber: 1234567895,
-                isSelected: true
-            }
-        ],
         localRetailerList: [],
         distinctRetailerLapuNumberList: [],
+        distinctFseLapuNumberList: [],
         isFilterVisible: false
-    }
-
-    filterChangeHandler = event => {
-        this.setState({ retailer: event.target.value })
     }
 
     filterDrawerCloseHandler = () => {
@@ -69,16 +36,33 @@ class ViewRetailers extends React.Component {
         })
     }
 
-    onFilterChipClicked = (retailerLapuNumber) => {
+    onRetailerFilterClicked = retailerLapuNumber => {
         const updatedRetailerList = this.state.localRetailerList.map(retailer => {
-            if(retailer.retailerLAPUNumber === retailerLapuNumber) {
+            if (retailer.retailerLAPUNumber === retailerLapuNumber) {
                 retailer.isSelected = !retailer.isSelected
             }
             return retailer
         })
 
+        const selectedList = [...new Set(updatedRetailerList.map(retailer => retailer.isSelected ? retailer.FOSBeat : null).filter(lapuNumber => lapuNumber !== null))]
+        const unSelectedList = [...new Set(updatedRetailerList.map(retailer => retailer.isSelected ? null : retailer.FOSBeat).filter(lapuNumber => lapuNumber !== null))]
+
+
+        const updatedDistinctFseLapuNumberList = selectedList.map(lapuNumber => ({
+            fseLapuNumber: lapuNumber,
+            isSelected: true
+        }))
+            .concat(
+                unSelectedList.filter(lapuNumber => selectedList.indexOf(lapuNumber) === -1)
+                    .map(lapuNumber => ({
+                        fseLapuNumber: lapuNumber,
+                        isSelected: false
+                    }))
+            )
+
+
         const updatedDistinctRetailerLapuNumberList = this.state.distinctRetailerLapuNumberList.map(retailer => {
-            if(retailer.retailerLAPUNumber === retailerLapuNumber) {
+            if (retailer.retailerLapuNumber === retailerLapuNumber) {
                 retailer.isSelected = !retailer.isSelected
             }
             return retailer
@@ -86,41 +70,165 @@ class ViewRetailers extends React.Component {
 
         this.setState({
             localRetailerList: updatedRetailerList,
-            distinctRetailerLapuNumberList: updatedDistinctRetailerLapuNumberList
+            distinctRetailerLapuNumberList: updatedDistinctRetailerLapuNumberList,
+            distinctFseLapuNumberList: updatedDistinctFseLapuNumberList
+        })
+    }
+
+    onFseFilterChipClicked = fseLapuNumber => {
+        let isSelectedAfterToggle = true;
+        const updatedDistinctFseLapuNumberList = this.state.distinctFseLapuNumberList.map(fse => {
+            if (fse.fseLapuNumber === fseLapuNumber) {
+                fse.isSelected = !fse.isSelected
+                isSelectedAfterToggle = fse.isSelected
+            }
+            return fse
+        })
+
+        const updatedRetailerList = this.state.localRetailerList.map(retailer => {
+            if (retailer.FOSBeat === fseLapuNumber) {
+                retailer.isSelected = isSelectedAfterToggle
+            }
+            return retailer
+        })
+
+        const tempDistinctRetailerLapuNumberList = updatedRetailerList.map(retailer => {
+            if (retailer.isSelected) {
+                return {
+                    retailerLapuNumber: retailer.retailerLAPUNumber,
+                    isSelected: true
+                }
+            } else {
+                return {
+                    retailerLapuNumber: retailer.retailerLAPUNumber,
+                    isSelected: false
+                }
+            }
+        })
+
+        let updatedDistinctRetailerLapuNumberList = [];
+        const map = new Map();
+        for (const retailer of tempDistinctRetailerLapuNumberList) {
+            if (!map.has(retailer.retailerLapuNumber)) {
+                map.set(retailer.retailerLapuNumber, true);
+                updatedDistinctRetailerLapuNumberList.push({
+                    retailerLapuNumber: retailer.retailerLapuNumber,
+                    isSelected: retailer.isSelected
+                });
+            }
+        }
+
+        this.setState({
+            localRetailerList: updatedRetailerList,
+            distinctRetailerLapuNumberList: updatedDistinctRetailerLapuNumberList,
+            distinctFseLapuNumberList: updatedDistinctFseLapuNumberList
         })
     }
 
     componentDidUpdate() {
+        this.loadLocalLists();
+    }
+
+    componentDidMount() {
+        this.fetchRetailerListForFirstTime();
+        this.loadLocalLists();
+    }
+
+    componentWillUnmount() {
+        this.props.resetRetailers();
+    }
+
+    loadLocalLists = () => {
         if (this.state.localRetailerList.length === 0 && this.props.retailerList.length > 0) {
             const localRetailerList = this.props.retailerList.map(retailer => {
                 retailer.isSelected = true;
+                retailer.date = new Date(retailer.addedAt.seconds * 1000).toLocaleDateString();
+                retailer.time = new Date(retailer.addedAt.seconds * 1000).toLocaleTimeString();
+                retailer.dateTime = new Date(retailer.addedAt.seconds * 1000).toLocaleString();
                 return retailer;
             })
 
             const retailerLapuNumberList = [...new Set(this.props.retailerList.map(retailer => retailer.retailerLAPUNumber))]
             const distinctRetailerLapuNumberList = retailerLapuNumberList.map(lapuNumber => {
                 return {
-                    retailerLAPUNumber: lapuNumber,
+                    retailerLapuNumber: lapuNumber,
                     isSelected: true
                 }
             })
+
+            const fseLapuNumberList = [...new Set(this.props.retailerList.map(retailer => retailer.FOSBeat))]
+            const distinctFseLapuNumberList = fseLapuNumberList.map(lapuNumber => {
+                return {
+                    fseLapuNumber: lapuNumber,
+                    isSelected: true
+                }
+            })
+
             this.setState({
                 localRetailerList,
-                distinctRetailerLapuNumberList
+                distinctRetailerLapuNumberList,
+                distinctFseLapuNumberList
             })
         }
     }
 
+    fetchRetailerListForFirstTime = () => {
+
+        if (this.props.retailerCountInDb <= 0 && localStorage.getItem('isFSE') === 'true') {
+            this.props.fetchRetailerListForFSE(this.props.user.lapuNumber);
+        } else if (this.props.retailerCountInDb <= 0 && localStorage.getItem('isFSE') === 'false') {
+            if (this.props.location.search === '') {
+                this.props.fetchRetailerListForTM(this.props.user.lapuNumber);
+            } else {
+                const fseLapuNumber = this.props.location.search.split("=")[1];
+                this.props.fetchRetailerListForFSE(fseLapuNumber);
+            }
+        }
+    }
+
     render() {
-        
-        if (this.props.user && this.props.retailerList.length === 0) {
-            this.props.fetchRetailerList(this.props.user.lapuNumber);
+
+        const icon = {
+            color: '#3f51b5',
+            cursor: 'pointer'
+        }
+        let excel = null;
+
+        const selectedRetailerList = this.state.localRetailerList.map(retailer => retailer.isSelected ? retailer : null)
+            .filter(retailer => retailer != null)
+
+        if (selectedRetailerList.length !== 0) {
+            excel = (
+                <ExcelFile element={<GetAppIcon style={icon} />}>
+                    <ExcelSheet data={selectedRetailerList} name="Entries">
+                        <ExcelColumn label="FSE LAPU Number" value="FOSBeat" />
+                        <ExcelColumn label="Retailer LAPU Number" value="retailerLAPUNumber" />
+                        <ExcelColumn label="Jio Tertiary" value="jioTertiary" />
+                        <ExcelColumn label="Jio Gross" value="jioGross" />
+                        <ExcelColumn label="Vodafone Tertiary" value="vodafoneTertiary" />
+                        <ExcelColumn label="Vodafone Gross" value="vodafoneGross" />
+                        <ExcelColumn label="Idea Tertiary" value="ideaTertiary" />
+                        <ExcelColumn label="Idea Gross" value="ideaGross" />
+                        <ExcelColumn label="Added At" value="dateTime" />
+                        <ExcelColumn label="Date" value="date" />
+                        <ExcelColumn label="Time" value="time" />
+                    </ExcelSheet>
+                </ExcelFile>
+            )
         }
 
         const heading = (
-            <Typography variant="h5" onClick={this.props.check}>
-                View Retailers
-            </Typography>
+            <Grid
+                container
+                direction="row"
+                justify="space-between"
+                alignItems="flex-start"
+            >
+                <Typography variant="h5">
+                    View Retailers
+                </Typography>
+                {excel}
+            </Grid>
         );
 
         const retailerFilter = (
@@ -143,45 +251,62 @@ class ViewRetailers extends React.Component {
                                 boxShadow: '0 1px #ccc'
                             }
                         }
-                        
+
                         return (
-                            <Chip key={retailer.retailerLAPUNumber}
+                            <Chip key={retailer.retailerLapuNumber}
                                 variant="outlined"
                                 color="primary"
                                 clickable
                                 size="small"
                                 icon={icon}
-                                onClick={() => this.onFilterChipClicked(retailer.retailerLAPUNumber)}
+                                onClick={() => this.onRetailerFilterClicked(retailer.retailerLapuNumber)}
                                 style={style}
-                                label={retailer.retailerLAPUNumber}
+                                label={retailer.retailerLapuNumber}
                             />
                         )
-                    }
-                    )
+                    })
                 }
             </div>
         )
 
         let fseFilter = null;
-        if (localStorage.getItem('isFSE') && localStorage.getItem('isFSE') === 'false') {
-            fseFilter = (
-                <div>
-                    <Typography variant="h5">
-                        FSEs
-                            </Typography>
-                    {this.state.fseList.map(fse => (
-                        <Chip key={fse.lapuNumber}
-                            variant="outlined"
-                            color="primary"
-                            clickable
-                            onClick={this.onFilterChipClicked}
-                            style={{ margin: '5px' }}
-                            label={fse.lapuNumber}
-                        />
-                    ))}
-                </div>
-            )
-        }
+        fseFilter = (
+            <div>
+                <Typography variant="h6">
+                    FSEs
+                </Typography>
+                {
+                    this.state.distinctFseLapuNumberList.map(fse => {
+                        let icon = null;
+                        let style = {
+                            margin: '5px'
+                        };
+
+                        if (fse.isSelected) {
+                            icon = <CheckCircleOutlineIcon />
+                            style = {
+                                margin: '5px',
+                                backgroundColor: 'rgba(0, 0, 150, 0.2)',
+                                boxShadow: '0 1px #ccc'
+                            }
+                        }
+
+                        return (
+                            <Chip key={fse.fseLapuNumber}
+                                variant="outlined"
+                                color="primary"
+                                clickable
+                                size="small"
+                                icon={icon}
+                                onClick={() => this.onFseFilterChipClicked(fse.fseLapuNumber)}
+                                style={style}
+                                label={fse.fseLapuNumber}
+                            />
+                        )
+                    })
+                }
+            </div>
+        )
 
         let filter = null;
 
@@ -191,18 +316,34 @@ class ViewRetailers extends React.Component {
                     {retailerFilter}
                     <Divider />
                     {fseFilter}
-                    <Button variant="contained" fullWidth color="primary" onClick={this.filterDrawerCloseHandler}>Done</Button>
+                    <Button variant="contained" fullWidth color="primary" style={{ marginTop: '10px' }} onClick={this.filterDrawerCloseHandler}>Done</Button>
                 </div>
             </Drawer>
         )
 
 
+        let spinner = <Spinner />;
+        if (this.props.retailerCountInDb >= 0) {
+            spinner = null;
+        }
 
-        let storeList = <Spinner />;
+        let entries = null;
+
+        let noRetailersFound = (
+            <div style={{ textAlign: "center", marginTop: '150px' }}>
+                <Typography variant="caption">
+                    No Entries found!
+                </Typography>
+            </div>
+        );
+
+        if (this.props.retailerCountInDb !== 0) {
+            noRetailersFound = null;
+        }
 
         if (this.state.localRetailerList.length !== 0) {
-            storeList = this.state.localRetailerList.map((retailer, index) => {
-                if(!retailer.isSelected) {
+            entries = this.state.localRetailerList.map((retailer, index) => {
+                if (!retailer.isSelected) {
                     return null;
                 }
                 return (
@@ -217,7 +358,7 @@ class ViewRetailers extends React.Component {
                         vodafoneGross={retailer.vodafoneGross}
                         ideaTertiary={retailer.ideaTertiary}
                         ideaGross={retailer.ideaGross}
-                        addedAt={retailer.addedAt}
+                        dateTime={retailer.dateTime}
                     />
                 )
             })
@@ -238,7 +379,9 @@ class ViewRetailers extends React.Component {
                 <Fab color="primary" aria-label="Filter" onClick={this.filterDrawerOpenHandler} style={style} variant="round">
                     <FilterListIcon />
                 </Fab>
-                {storeList}
+                {spinner}
+                {entries}
+                {noRetailersFound}
                 {filter}
             </React.Fragment>
         )
@@ -249,13 +392,16 @@ class ViewRetailers extends React.Component {
 const mapStateToProps = state => {
     return {
         user: state.user.user,
-        retailerList: state.retailer.retailerList
+        isAuthenticated: state.user.isAuthenticated,
+        retailerList: state.retailer.retailerList,
+        retailerCountInDb: state.retailer.retailerCount
     }
 }
 
 const mapDispatchToProps = dispatch => ({
-    fetchRetailerList: fseLapuNumber => dispatch(fetchRetailerDetailsFromFirestore(fseLapuNumber)),
-    check: () => dispatch({ type: SET_IS_FSE })
+    fetchRetailerListForFSE: fseLapuNumber => dispatch(fetchRetailerDetailsForFseFromFirestore(fseLapuNumber)),
+    fetchRetailerListForTM: tmLapuNumber => dispatch(fetchRetailerDetailsForTmFromFirestore(tmLapuNumber)),
+    resetRetailers: () => dispatch({ type: RESET_RETAILER })
 })
 
 export default connect(mapStateToProps, mapDispatchToProps)(ViewRetailers);

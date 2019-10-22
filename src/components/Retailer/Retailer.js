@@ -68,7 +68,7 @@ const Retailer = props => {
 
     const addedAt = (
         <Typography variant="caption">
-            <i>{new Date(props.addedAt.seconds * 1000).toLocaleString()}</i>
+            <i>{props.dateTime}</i>
         </Typography>
     )
     return (
