@@ -33,7 +33,7 @@ class ViewFSEs extends React.Component {
         return (
             <React.Fragment>
                 <Typography variant='h5'>FSEs under you</Typography>
-                <Paper>
+                <Paper style={{marginTop: '15px'}}>
                     <List>
                         {list}
                     </List>
