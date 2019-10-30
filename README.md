@@ -26,8 +26,8 @@ This web app is developed using React and Redux. Google's Firebase is used for a
 - react-export-excel
 
 ## Images
-<img src="src/assets/images/Login.png" width="320"><br><br>
-<img src="src/assets/images/Navigation.png" width="320"><br><br>
-<img src="src/assets/images/ViewRetailers.png" width="320"><br><br>
-<img src="src/assets/images/Filters.png" width="320"><br><br>
-<img src="src/assets/images/AddFse.png" width="320"><br><br>
+<img src="src/assets/images/Login.png" width="320">
+<img src="src/assets/images/Navigation.png" width="320">
+<img src="src/assets/images/ViewRetailers.png" width="320">
+<img src="src/assets/images/Filters.png" width="320">
+<img src="src/assets/images/AddFse.png" width="320">
