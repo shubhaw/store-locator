@@ -16,7 +16,6 @@ import { connect } from 'react-redux';
 import { logoutFromFirestore } from '../../../../store/actions/actions';
 
 import AddLocationIcon from '@material-ui/icons/AddLocation';
-import GetAppIcon from '@material-ui/icons/GetApp';
 import PersonAddIcon from '@material-ui/icons/PersonAdd';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';

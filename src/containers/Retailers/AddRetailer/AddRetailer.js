@@ -197,7 +197,13 @@ class AddStore extends React.Component {
             storeDetails[formElementName] = Number(this.state.storeForm[formElementName].value);
         }
 
-        storeDetails.location = this.state.location;
+        
+        if(this.state.location) {
+            storeDetails.location = this.state.location;
+        } else {
+            this.fetchCurrentLocation();
+            return;
+        }
         storeDetails.addedAt = new Date();
         storeDetails.managerLapuNumber = Number(localStorage.getItem('managerLapuNumber'));
 
@@ -246,7 +252,7 @@ class AddStore extends React.Component {
 
     locationErrorHandler = err => {
         if (err.code === 1) {
-            alert("Error: Access is denied!\nPlease allow the browser to access the location.");
+            alert("Error: Access is denied!\nPlease allow the browser to access the location by clicking on small lock symbol on the top address bar and then turning on the GPS of your device.");
         } else if (err.code === 2) {
             alert("Error: Location is unavailable!");
         }

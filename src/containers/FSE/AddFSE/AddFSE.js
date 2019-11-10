@@ -6,7 +6,7 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Spinner from '../../../components/UI/Spinner/Spinner';
 import AlertDialog from '../../../components/UI/Dialog/Dialog';
-import { FormControl, Typography } from '@material-ui/core';
+import { Typography } from '@material-ui/core';
 import { RESET_STATE } from '../../../store/actions/actionTypes';
 
 
@@ -122,15 +122,15 @@ class AddFSE extends React.Component {
             form = <Spinner />
         } else {
             form = (
-                <form onSubmit={this.formSubmitHandler} style={{marginTop: '15px'}}>
-                    <TextField 
-                        {...this.state.fseForm.fseLapuNumber.elementConfig} 
+                <form onSubmit={this.formSubmitHandler} style={{ marginTop: '15px' }}>
+                    <TextField
+                        {...this.state.fseForm.fseLapuNumber.elementConfig}
                         value={this.state.fseForm.fseLapuNumber.value}
                         required
                         fullWidth
                         onChange={this.fseLapuNumberChangeHandler} />
-                    
-                    <Button variant="contained" color="primary" style={{marginTop: '15px'}} fullWidth type="submit">
+
+                    <Button variant="contained" color="primary" style={{ marginTop: '15px' }} fullWidth type="submit">
                         Add FSE
                     </Button>
                 </form>

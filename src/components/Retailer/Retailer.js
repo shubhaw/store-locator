@@ -18,7 +18,11 @@ const Retailer = props => {
                         <b>Retailer Location</b>
                     </Typography>
                 </td>
-                <td align="right">{props.location.lat}, {props.location.lng}</td>
+                <td align="right">
+                    {
+                        props.location ? props.location.lat + ", " + props.location.lng : null
+                    }
+                </td>
             </tr>
         </React.Fragment>
     )
@@ -75,15 +79,15 @@ const Retailer = props => {
         <React.Fragment>
             <Card style={{ margin: '10px 0' }}>
                 <CardContent>
-                    <table width="100%" style={{marginBottom: '0px'}}>
+                    <table width="100%" style={{ marginBottom: '0px' }}>
                         <tbody>
                             {retailerDetailsTable}
                             {fseLapuNumberRow}
                         </tbody>
                     </table>
-                    
+
                     {competitorDetailsTable}
-                    <div style={{textAlign: 'right', marginTop: '10px'}}>
+                    <div style={{ textAlign: 'right', marginTop: '10px' }}>
                         {addedAt}
                     </div>
                 </CardContent>

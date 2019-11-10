@@ -2,7 +2,7 @@ import React from 'react';
 import { connect } from 'react-redux';
 import ReactExport from 'react-export-excel';
 import Spinner from '../../../components/UI/Spinner/Spinner';
-import { Typography, Drawer, Fab, Divider, Button, Chip, Grid, Avatar } from '@material-ui/core';
+import { Typography, Drawer, Fab, Divider, Button, Chip, Grid } from '@material-ui/core';
 import FilterListIcon from '@material-ui/icons/FilterList';
 import CheckCircleOutlineIcon from '@material-ui/icons/CheckCircleOutline';
 import styleClasses from './ViewRetailers.module.css';
