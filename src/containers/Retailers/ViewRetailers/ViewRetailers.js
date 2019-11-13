@@ -199,6 +199,7 @@ class ViewRetailers extends React.Component {
 
         const selectedRetailerList = this.state.localRetailerList.map(retailer => {
             if (retailer.isSelected) {
+                retailer.whatsapp = (retailer.whatsapp === 0) ? null : retailer.whatsapp;
                 retailer.latitude = retailer.location ? retailer.location.lat : null;
                 retailer.longitude = retailer.location ? retailer.location.lng : null;
                 retailer.formattedLocation = retailer.location ? (retailer.location.lat + '°N, ' + retailer.location.lng + '°E') : null;
@@ -215,6 +216,7 @@ class ViewRetailers extends React.Component {
                     <ExcelSheet data={selectedRetailerList} name="Entries">
                         <ExcelColumn label="FSE LAPU Number" value="FOSBeat" />
                         <ExcelColumn label="Retailer LAPU Number" value="retailerLAPUNumber" />
+                        <ExcelColumn label="Retailer Whatsapp Number" value="whatsapp" />
                         <ExcelColumn label="Jio Tertiary" value="jioTertiary" />
                         <ExcelColumn label="Jio Gross" value="jioGross" />
                         <ExcelColumn label="Vodafone Tertiary" value="vodafoneTertiary" />
@@ -374,6 +376,7 @@ class ViewRetailers extends React.Component {
                         ideaTertiary={retailer.ideaTertiary}
                         ideaGross={retailer.ideaGross}
                         dateTime={retailer.dateTime}
+                        whatsapp={retailer.whatsapp}
                     />
                 )
             })
