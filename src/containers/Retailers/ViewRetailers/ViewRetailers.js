@@ -194,8 +194,20 @@ class ViewRetailers extends React.Component {
         }
         let excel = null;
 
-        const selectedRetailerList = this.state.localRetailerList.map(retailer => retailer.isSelected ? retailer : null)
-            .filter(retailer => retailer != null)
+        // const selectedRetailerList = this.state.localRetailerList.map(retailer => retailer.isSelected ? retailer : null)
+        //     .filter(retailer => retailer != null);
+
+        const selectedRetailerList = this.state.localRetailerList.map(retailer => {
+            if (retailer.isSelected) {
+                retailer.latitude = retailer.location ? retailer.location.lat : null;
+                retailer.longitude = retailer.location ? retailer.location.lng : null;
+                retailer.formattedLocation = retailer.location ? (retailer.location.lat + '°N, ' + retailer.location.lng + '°E') : null;
+                return retailer;
+            } else {
+                return null;
+            }
+        })
+            .filter(retailer => retailer != null);
 
         if (selectedRetailerList.length !== 0) {
             excel = (
@@ -212,6 +224,9 @@ class ViewRetailers extends React.Component {
                         <ExcelColumn label="Added At" value="dateTime" />
                         <ExcelColumn label="Date" value="date" />
                         <ExcelColumn label="Time" value="time" />
+                        <ExcelColumn label="Location (Lat, Lng)" value="formattedLocation" />
+                        <ExcelColumn label="Latitude" value="latitude" />
+                        <ExcelColumn label="Longitude" value="longitude" />
                     </ExcelSheet>
                 </ExcelFile>
             )
