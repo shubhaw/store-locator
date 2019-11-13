@@ -35,6 +35,28 @@ class AddStore extends React.Component {
                 isValid: false,
                 isTouched: false
             },
+            whatsapp: {
+                elementType: 'input',
+                elementConfig: {
+                    type: 'number',
+                    label: 'Retailer Whatsapp Number',
+                    placeholder: 'Retailer Whatsapp Number',
+                    required: false
+                },
+                inputProps: {
+                    readOnly: false,
+                    min: 1000000000,
+                    max: 9999999999
+                },
+                value: '',
+                validation: {
+                    required: false,
+                    min: 1000000000,
+                    max: 9999999999
+                },
+                isValid: false,
+                isTouched: false
+            },
             FOSBeat: {
                 elementType: 'input',
                 elementConfig: {

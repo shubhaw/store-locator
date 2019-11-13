@@ -15,6 +15,14 @@ const Retailer = props => {
             <tr>
                 <td>
                     <Typography variant="body2">
+                        <b>Retailer Whatsapp Number</b>
+                    </Typography>
+                </td>
+                <td align="right">{props.whatsapp}</td>
+            </tr>
+            <tr>
+                <td>
+                    <Typography variant="body2">
                         <b>Retailer Location</b>
                     </Typography>
                 </td>
