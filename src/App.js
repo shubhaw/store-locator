@@ -15,7 +15,7 @@ import ViewRetailers from './containers/Retailers/ViewRetailers/ViewRetailers';
 class App extends React.Component {
 
     componentDidMount() {
-        console.log('[App.js] componentDidMount()')
+        // console.log('[App.js] componentDidMount()')
         this.props.resetState();
         firebaseApp.auth().onAuthStateChanged(user => {
             if(user) {
@@ -61,9 +61,9 @@ class App extends React.Component {
             routes = tmRoutes;
         }
 
-        console.log('[App.js] -------------start-------------')
-        console.log('[App.js] isAuthenticated:', this.props.isAuthenticated)
-        console.log('[App.js] -------------end-------------')
+        // console.log('[App.js] -------------start-------------')
+        // console.log('[App.js] isAuthenticated:', this.props.isAuthenticated)
+        // console.log('[App.js] -------------end-------------')
         return (
             <BrowserRouter>
                 <Layout>

@@ -17,8 +17,8 @@ class AddStore extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    label: 'Retailer LAPU Number',
-                    placeholder: 'Retailer LAPU Number',
+                    label: 'Retailer PhonePe Merchant Number',
+                    placeholder: 'Retailer PhonePe Merchant Number',
                     required: true
                 },
                 inputProps: {
@@ -75,8 +75,8 @@ class AddStore extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    label: 'Jio Tertiary',
-                    placeholder: 'Jio Tertiary',
+                    label: 'Paytm QR (1 for Yes / 0 for No)',
+                    placeholder: 'Paytm QR (1 for Yes / 0 for No)',
                     required: true
                 },
                 inputProps: {
@@ -93,8 +93,8 @@ class AddStore extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    label: 'Jio Gross',
-                    placeholder: 'Jio Gross',
+                    label: 'Google Pay QR (1 for Yes / 0 for No)',
+                    placeholder: 'Google Pay QR (1 for Yes / 0 for No)',
                     required: true
                 },
                 inputProps: {
@@ -111,8 +111,8 @@ class AddStore extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    label: 'Vodafone Tertiary',
-                    placeholder: 'Vodafone Tertiary',
+                    label: 'Any other UPI QR (1 for Yes / 0 for No)',
+                    placeholder: 'Any other UPI QR (1 for Yes / 0 for No)',
                     required: true
                 },
                 inputProps: {
@@ -129,8 +129,8 @@ class AddStore extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    label: 'Vodafone Gross',
-                    placeholder: 'Vodafone Gross',
+                    label: '1st Transaction Completed (1 for Yes / 0 for No)',
+                    placeholder: '1st Transaction Completed (1 for Yes / 0 for No)',
                     required: true
                 },
                 inputProps: {
@@ -147,8 +147,8 @@ class AddStore extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    label: 'Idea Tertiary',
-                    placeholder: 'Idea Tertiary',
+                    label: 'PhonePe Merchant KYC Completed (1 for Yes / 0 for No)',
+                    placeholder: 'PhonePe Merchant KYC Completed (1 for Yes / 0 for No)',
                     required: true
                 },
                 inputProps: {
@@ -165,8 +165,8 @@ class AddStore extends React.Component {
                 elementType: 'input',
                 elementConfig: {
                     type: 'number',
-                    label: 'Idea Gross',
-                    placeholder: 'Idea Gross',
+                    label: 'Town code of Shop',
+                    placeholder: 'Town code of Shop',
                     required: true
                 },
                 inputProps: {
@@ -308,10 +308,8 @@ class AddStore extends React.Component {
     }
 
     componentDidUpdate() {
-        console.log('[AddStore.js] componentDidMount(). location', this.props.location)
         // to reset the form
         if (this.props.isSuccessful) {
-            console.log('Coming inside')
             let form = this.state.storeForm;
             for (let formElement in form) {
                 if (formElement !== 'FOSBeat') {

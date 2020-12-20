@@ -214,15 +214,15 @@ class ViewRetailers extends React.Component {
             excel = (
                 <ExcelFile element={<GetAppIcon style={icon} />}>
                     <ExcelSheet data={selectedRetailerList} name="Entries">
-                        <ExcelColumn label="FSE LAPU Number" value="FOSBeat" />
-                        <ExcelColumn label="Retailer LAPU Number" value="retailerLAPUNumber" />
+                        <ExcelColumn label="FOS Beat" value="FOSBeat" />
+                        <ExcelColumn label="Retailer PhonePe Merchant Number" value="retailerLAPUNumber" />
                         <ExcelColumn label="Retailer Whatsapp Number" value="whatsapp" />
-                        <ExcelColumn label="Jio Tertiary" value="jioTertiary" />
-                        <ExcelColumn label="Jio Gross" value="jioGross" />
-                        <ExcelColumn label="Vodafone Tertiary" value="vodafoneTertiary" />
-                        <ExcelColumn label="Vodafone Gross" value="vodafoneGross" />
-                        <ExcelColumn label="Idea Tertiary" value="ideaTertiary" />
-                        <ExcelColumn label="Idea Gross" value="ideaGross" />
+                        <ExcelColumn label="Paytm QR" value="jioTertiary" />
+                        <ExcelColumn label="Google Pay QR" value="jioGross" />
+                        <ExcelColumn label="Any other UPI QR" value="vodafoneTertiary" />
+                        <ExcelColumn label="First Transaction Completed" value="vodafoneGross" />
+                        <ExcelColumn label="PhonePe Merchant KYC Completed" value="ideaTertiary" />
+                        <ExcelColumn label="Town code of Shop" value="ideaGross" />
                         <ExcelColumn label="Added At" value="dateTime" />
                         <ExcelColumn label="Date" value="date" />
                         <ExcelColumn label="Time" value="time" />
